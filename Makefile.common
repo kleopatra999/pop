@@ -1,0 +1,18 @@
+POP_CXXFLAGS = $(CPPFLAGS) $(CXXFLAGS) -std=c++14 -pedantic -fPIC \
+	-Wall -Wextra -Werror
+
+POP_LDFLAGS = $(LDFLAGS)
+
+ifndef RELEASE
+	POP_CXXFLAGS += -g -UNDEBUG -DPOP_DEBUG=1
+else
+	POP_CXXFLAGS += -O3 -DNDEBUG=1 -UPOP_DEBUG
+endif
+
+ifeq ($(V), 1)
+	POP_CXX = $(CXX) -c -MMD
+	POP_CXXLD = $(CXXLD)
+else
+	POP_CXX = @echo "  COMPILE $@" && $(CXX) -c -MMD
+	POP_CXXLD = @echo "  LINK $@" && $(CXX)
+endif
