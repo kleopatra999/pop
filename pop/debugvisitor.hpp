@@ -2,6 +2,7 @@
 #define POP_PARENTER_HPP
 
 #include <pop/ast.hpp>
+#include <cassert>
 #include <ostream>
 
 namespace Pop
@@ -92,8 +93,18 @@ struct DebugVisitor : public Visitor
 		indent();
 		out << indent_str() << "<Arguments>\n";
 		indent();
-		for (auto &arg : n.default_arguments)
-			arg->accept(*this);
+		for (size_t i = 0; i < n.arguments.size(); i++)
+		{
+			out << indent_str() << "<Argument name='" << n.arguments[i] << "'";
+			if (i < n.default_arguments.size())
+			{
+				out << ">\n";
+				n.default_arguments[i]->accept(*this);
+				out << indent_str() << "</Argument>\n";
+			}
+			else
+				out << "/>\n";
+		}
 		unindent();
 		out << indent_str() << "</Arguments>\n";
 		out << indent_str() << "<Body>\n";

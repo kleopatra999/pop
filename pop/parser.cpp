@@ -1,6 +1,7 @@
 #include <pop/parser.hpp>
 #include <pop/parenter.hpp>
 #include <iostream>
+#include <sstream>
 #include <unordered_map>
 
 namespace std
@@ -19,6 +20,32 @@ struct hash<Pop::TokenKind>
 namespace Pop
 {
 
+#define expect(t) expect_(t, __LINE__)
+
+static int ind_lvl = 0;
+
+static std::string ind_str()
+{
+	return std::string(ind_lvl, ' ');
+}
+
+struct ScopedTracer
+{
+	std::string fnc;
+	ScopedTracer(const std::string &fnc) : fnc(fnc)
+	{
+		std::cerr << ind_str() << "-> " << fnc << std::endl;
+		ind_lvl += 2;
+	}
+	~ScopedTracer()
+	{
+		ind_lvl -= 2;
+		std::cerr << ind_str() << "<- " << fnc << std::endl;
+	}
+};
+
+#define TRACE_FUNC() ScopedTracer __tracer_##__COUNTER__##__(__func__)
+
 using namespace Ast;
 
 template <class T, class... Args>
@@ -27,48 +54,54 @@ static inline std::unique_ptr<T> mknode(Args &&... args)
 	return std::make_unique<T>(std::forward<Args>(args)...);
 }
 
-// clang-format off
-static const std::unordered_map<TokenKind, int> binop_precedence =
+struct BinOpInfo
 {
-	{TokenKind::POSTINC, 15},
-	{TokenKind::POSTDEC, 15},
-	{TokenKind::UPLUS, 15},
-	{TokenKind::UMINUS, 15},
-	{TokenKind::MEMBER, 15},
-	{TokenKind::PREINC, 14},
-	{TokenKind::PREDEC, 14},
-	{TokenKind::L_NOT, 14},
-	{TokenKind::B_NOT, 14},
-	{TokenKind::MUL, 12},
-	{TokenKind::DIV, 12},
-	{TokenKind::MOD, 12},
-	{TokenKind::POW, 12},
-	{TokenKind::ADD, 11},
-	{TokenKind::SUB, 11},
-	{TokenKind::LSHIFT, 10},
-	{TokenKind::RSHIFT, 10},
-	{TokenKind::LT, 9},
-	{TokenKind::LE, 9},
-	{TokenKind::GT, 9},
-	{TokenKind::GE, 9},
-	{TokenKind::EQ, 8},
-	{TokenKind::NE, 8},
-	{TokenKind::B_AND, 7},
-	{TokenKind::B_XOR, 6},
-	{TokenKind::B_OR, 5},
-	{TokenKind::L_AND, 4},
-	{TokenKind::L_OR, 3},
-	{TokenKind::ASSIGN, 2},
-	{TokenKind::ADD_ASSIGN, 2},
-	{TokenKind::SUB_ASSIGN, 2},
-	{TokenKind::MUL_ASSIGN, 2},
-	{TokenKind::DIV_ASSIGN, 2},
-	{TokenKind::MOD_ASSIGN, 2},
-	{TokenKind::LEFT_ASSIGN, 2},
-	{TokenKind::RIGHT_ASSIGN, 2},
-	{TokenKind::AND_ASSIGN, 2},
-	{TokenKind::XOR_ASSIGN, 2},
-	{TokenKind::OR_ASSIGN, 2},
+	int prec;
+	bool left_assoc;
+};
+
+// clang-format off
+static const std::unordered_map<TokenKind, BinOpInfo> binop_precedence =
+{
+	{TokenKind::POSTINC, {15,true}},
+	{TokenKind::POSTDEC, {15,true}},
+	{TokenKind::UPLUS, {15,true}},
+	{TokenKind::UMINUS, {15,true}},
+	{TokenKind::MEMBER, {15,true}},
+	{TokenKind::PREINC, {14,false}},
+	{TokenKind::PREDEC, {14,false}},
+	{TokenKind::L_NOT, {14,false}},
+	{TokenKind::B_NOT, {14,false}},
+	{TokenKind::MUL, {12,true}},
+	{TokenKind::DIV, {12,true}},
+	{TokenKind::MOD, {12,true}},
+	{TokenKind::POW, {12,true}},
+	{TokenKind::ADD, {11,true}},
+	{TokenKind::SUB, {11,true}},
+	{TokenKind::LSHIFT, {10,true}},
+	{TokenKind::RSHIFT, {10,true}},
+	{TokenKind::LT, {9,true}},
+	{TokenKind::LE, {9,true}},
+	{TokenKind::GT, {9,true}},
+	{TokenKind::GE, {9,true}},
+	{TokenKind::EQ, {8,true}},
+	{TokenKind::NE, {8,true}},
+	{TokenKind::B_AND, {7,true}},
+	{TokenKind::B_XOR, {6,true}},
+	{TokenKind::B_OR, {5,true}},
+	{TokenKind::L_AND, {4,true}},
+	{TokenKind::L_OR, {3,true}},
+	{TokenKind::ASSIGN, {2,false}},
+	{TokenKind::ADD_ASSIGN, {2,false}},
+	{TokenKind::SUB_ASSIGN, {2,false}},
+	{TokenKind::MUL_ASSIGN, {2,false}},
+	{TokenKind::DIV_ASSIGN, {2,false}},
+	{TokenKind::MOD_ASSIGN, {2,false}},
+	{TokenKind::LEFT_ASSIGN, {2,false}},
+	{TokenKind::RIGHT_ASSIGN, {2,false}},
+	{TokenKind::AND_ASSIGN, {2,false}},
+	{TokenKind::XOR_ASSIGN, {2,false}},
+	{TokenKind::OR_ASSIGN, {2,false}},
 };
 // clang-format on
 
@@ -76,8 +109,23 @@ static inline int get_token_precedence(TokenKind kind)
 {
 	auto found = binop_precedence.find(kind);
 	if (found != binop_precedence.end())
-		return found->second;
+	{
+		int prec = found->second.prec;
+		if (prec <= 0)
+			return -1;
+		return prec;
+	}
 	return -1;
+}
+
+static inline bool is_left_associative(TokenKind kind)
+{
+	auto found = binop_precedence.find(kind);
+	if (found != binop_precedence.end())
+		return found->second.left_assoc;
+	std::cerr << "unable to find precedence of operator '"
+	          << token_kind_name(kind) << "'" << std::endl;
+	return false;
 }
 
 std::uint64_t Parser::parse_int(const std::string &s)
@@ -121,6 +169,7 @@ double Parser::parse_float(const std::string &s)
 
 ModulePtr Parser::parse()
 {
+	TRACE_FUNC();
 	auto mod = mknode<Module>(lex.filename);
 	lex.next_token(tok);
 	while (auto stmt = parse_stmt())
@@ -132,6 +181,7 @@ ModulePtr Parser::parse()
 
 StmtPtr Parser::parse_stmt()
 {
+	TRACE_FUNC();
 	switch (tok.kind)
 	{
 		case TokenKind::LET:
@@ -167,13 +217,27 @@ StmtPtr Parser::parse_stmt()
 			expect(';');
 			return mknode<EmptyStmt>(start, end);
 		}
-		default: // expr stmt
+		case TokenKind::END:
+			return nullptr;
+		default:
 		{
+			/* expr stmt */
 			auto start = tok.range.start;
 			if (auto expr = parse_expr())
 			{
 				auto end = expr->range.end;
+				expect(';');
 				return mknode<ExprStmt>(std::move(expr), start, end);
+			}
+			else
+			{
+				/*
+				std::stringstream ss;
+				ss << "unexpected '" << tok.kind_name()
+				   << "', expecting statement";
+				throw SyntaxError(ss.str(), tok.range.start.line,
+				                  tok.range.start.column);
+				*/
 			}
 			break;
 		}
@@ -183,6 +247,7 @@ StmtPtr Parser::parse_stmt()
 
 StmtPtr Parser::parse_let_binding()
 {
+	TRACE_FUNC();
 	auto start = tok.range.start;
 	expect(TokenKind::LET);
 	std::string name = lex.text;
@@ -196,6 +261,7 @@ StmtPtr Parser::parse_let_binding()
 
 StmtPtr Parser::parse_break_stmt()
 {
+	TRACE_FUNC();
 	auto start = tok.range.start;
 	expect(TokenKind::BREAK);
 	auto end = tok.range.end;
@@ -205,6 +271,7 @@ StmtPtr Parser::parse_break_stmt()
 
 StmtPtr Parser::parse_continue_stmt()
 {
+	TRACE_FUNC();
 	auto start = tok.range.start;
 	expect(TokenKind::CONTINUE);
 	auto end = tok.range.end;
@@ -214,6 +281,7 @@ StmtPtr Parser::parse_continue_stmt()
 
 StmtPtr Parser::parse_return_stmt()
 {
+	TRACE_FUNC();
 	auto start = tok.range.start;
 	expect(TokenKind::RETURN);
 	auto end = tok.range.end;
@@ -229,6 +297,7 @@ StmtPtr Parser::parse_return_stmt()
 
 StmtPtr Parser::parse_goto_stmt()
 {
+	TRACE_FUNC();
 	auto start = tok.range.start;
 	expect(TokenKind::GOTO);
 	std::string name = tok.text;
@@ -240,6 +309,7 @@ StmtPtr Parser::parse_goto_stmt()
 
 StmtPtr Parser::parse_compound_stmt()
 {
+	TRACE_FUNC();
 	auto start = tok.range.start;
 	expect('{');
 	StmtList stmts;
@@ -252,6 +322,7 @@ StmtPtr Parser::parse_compound_stmt()
 
 StmtPtr Parser::parse_if_stmt()
 {
+	TRACE_FUNC();
 	auto start = tok.range.start;
 	expect(TokenKind::IF);
 	expect('(');
@@ -268,6 +339,7 @@ StmtPtr Parser::parse_if_stmt()
 
 StmtPtr Parser::parse_unless_stmt()
 {
+	TRACE_FUNC();
 	auto start = tok.range.start;
 	expect(TokenKind::UNLESS);
 	expect('(');
@@ -284,6 +356,7 @@ StmtPtr Parser::parse_unless_stmt()
 
 StmtPtr Parser::parse_do_stmt()
 {
+	TRACE_FUNC();
 	auto start = tok.range.start;
 	expect(TokenKind::DO);
 	auto stmt = parse_stmt();
@@ -312,6 +385,7 @@ StmtPtr Parser::parse_do_stmt()
 
 StmtPtr Parser::parse_while_stmt()
 {
+	TRACE_FUNC();
 	auto start = tok.range.start;
 	expect(TokenKind::WHILE);
 	expect('(');
@@ -324,6 +398,7 @@ StmtPtr Parser::parse_while_stmt()
 
 StmtPtr Parser::parse_until_stmt()
 {
+	TRACE_FUNC();
 	auto start = tok.range.start;
 	expect(TokenKind::UNTIL);
 	expect('(');
@@ -336,6 +411,7 @@ StmtPtr Parser::parse_until_stmt()
 
 StmtPtr Parser::parse_for_stmt()
 {
+	TRACE_FUNC();
 	auto start = tok.range.start;
 	expect(TokenKind::FOR);
 	expect('(');
@@ -355,6 +431,7 @@ StmtPtr Parser::parse_for_stmt()
 
 StmtPtr Parser::parse_func_decl()
 {
+	TRACE_FUNC();
 	auto start = tok.range.start;
 	expect(TokenKind::FUNCTION);
 	std::string text(tok.text);
@@ -386,6 +463,7 @@ StmtPtr Parser::parse_func_decl()
 
 ExprPtr Parser::parse_expr()
 {
+	TRACE_FUNC();
 	if (auto lhs = parse_unary_expr())
 		return parse_binop_rhs(0, std::move(lhs));
 	return nullptr;
@@ -393,41 +471,16 @@ ExprPtr Parser::parse_expr()
 
 ExprPtr Parser::parse_paren_expr()
 {
+	TRACE_FUNC();
 	expect('(');
 	auto expr = parse_expr();
 	expect(')');
 	return expr;
 }
 
-ExprPtr Parser::parse_ident_expr()
-{
-	auto start = tok.range.start;
-	auto id_end = tok.range.end;
-	std::string text(tok.text);
-	expect(TokenKind::IDENTIFIER);
-	if (!accept('('))
-	{
-		return mknode<Identifier>(text, start, id_end);
-	}
-	else
-	{
-		ExprList arguments;
-		while (true)
-		{
-			arguments.emplace_back(parse_expr());
-			if (!accept(','))
-				break;
-		}
-		auto end = tok.range.end;
-		expect(')');
-		auto id = mknode<Identifier>(text, start, id_end);
-		return mknode<CallExpr>(std::move(id), std::move(arguments), start,
-		                        end);
-	}
-}
-
 ExprPtr Parser::parse_primary_expr()
 {
+	TRACE_FUNC();
 	switch (tok.kind)
 	{
 		case TokenKind::NUL:
@@ -475,20 +528,40 @@ ExprPtr Parser::parse_primary_expr()
 			expect(TokenKind::STRING_LITERAL);
 			return mknode<StringLiteral>(text, start, end);
 		}
+		case TokenKind::IDENTIFIER:
+		{
+			auto start = tok.range.start;
+			auto end = tok.range.end;
+			std::string text(tok.text);
+			expect(TokenKind::IDENTIFIER);
+			return mknode<Identifier>(text, start, end);
+		}
 		case TokenKind::FUNCTION:
 			return parse_func_expr();
-		case TokenKind::IDENTIFIER:
-			return parse_ident_expr();
 		case TokenKind::LPAREN:
 			return parse_paren_expr();
+		case TokenKind::LBRACE:
+			return parse_object_expr();
+		case TokenKind::END:
+			return nullptr;
 		default:
+		{
+			/*
+			std::stringstream ss;
+			ss << "unexpected '" << tok.kind_name()
+			   << "', expecting an expression";
+			throw SyntaxError(ss.str(), tok.range.start.line,
+			                  tok.range.start.column);
+			*/
 			break;
+		}
 	}
 	return nullptr;
 }
 
 ExprPtr Parser::parse_binop_rhs(int expr_prec, ExprPtr lhs)
 {
+	TRACE_FUNC();
 	while (true)
 	{
 		int tok_prec = get_token_precedence(tok.kind);
@@ -500,9 +573,12 @@ ExprPtr Parser::parse_binop_rhs(int expr_prec, ExprPtr lhs)
 		if (!rhs)
 			return nullptr;
 		int next_prec = get_token_precedence(tok.kind);
-		if (tok_prec < next_prec)
+		if (tok_prec <= next_prec)
 		{
-			rhs = parse_binop_rhs(tok_prec + 1, std::move(rhs));
+			if (is_left_associative(tok.kind))
+				rhs = parse_binop_rhs(tok_prec + 1, std::move(rhs));
+			else
+				rhs = parse_binop_rhs(tok_prec, std::move(rhs));
 			if (!rhs)
 				return nullptr;
 		}
@@ -536,6 +612,9 @@ static inline bool is_unary_post_op(TokenKind kind)
 		case TokenKind::INCREMENT:
 		case TokenKind::DECREMENT:
 		case TokenKind::IF:
+		case TokenKind::LBRACKET:
+		case TokenKind::LPAREN:
+		case TokenKind::MEMBER:
 			return true;
 		default:
 			return false;
@@ -544,66 +623,115 @@ static inline bool is_unary_post_op(TokenKind kind)
 
 ExprPtr Parser::parse_unary_expr()
 {
+	TRACE_FUNC();
+	ExprPtr expr;
 	auto start = tok.range.start;
 	auto kind = tok.kind;
-	if (!is_unary_pre_op(kind))
-		return parse_primary_expr();
-	auto operand = parse_unary_expr();
-	auto end = operand->range.end;
-	ExprPtr expr;
-	switch (kind)
+	if (is_unary_pre_op(kind))
 	{
-		case TokenKind::ADD:
-			expr = mknode<UnaryExpr>(TokenKind::UPLUS, std::move(operand),
-			                         start, end);
-			break;
-		case TokenKind::SUB:
-			expr = mknode<UnaryExpr>(TokenKind::UMINUS, std::move(operand),
-			                         start, end);
-			break;
-		case TokenKind::L_NOT:
-			expr = mknode<UnaryExpr>(TokenKind::L_NOT, std::move(operand),
-			                         start, end);
-			break;
-		case TokenKind::B_NOT:
-			expr = mknode<UnaryExpr>(TokenKind::B_NOT, std::move(operand),
-			                         start, end);
-			break;
-		case TokenKind::INCREMENT:
-			expr = mknode<UnaryExpr>(TokenKind::PREINC, std::move(operand),
-			                         start, end);
-			break;
-		case TokenKind::DECREMENT:
-			expr = mknode<UnaryExpr>(TokenKind::PREDEC, std::move(operand),
-			                         start, end);
-			break;
-		default:
-			return nullptr;
-	}
-	if (is_unary_post_op(tok.kind))
-	{
-		kind = tok.kind;
-		end = tok.range.end;
 		expect(kind);
+		auto operand = parse_unary_expr();
+		auto end = operand->range.end;
 		switch (kind)
 		{
+			case TokenKind::ADD:
+				expr = mknode<UnaryExpr>(TokenKind::UPLUS, std::move(operand),
+				                         start, end);
+				break;
+			case TokenKind::SUB:
+				expr = mknode<UnaryExpr>(TokenKind::UMINUS, std::move(operand),
+				                         start, end);
+				break;
+			case TokenKind::L_NOT:
+				expr = mknode<UnaryExpr>(TokenKind::L_NOT, std::move(operand),
+				                         start, end);
+				break;
+			case TokenKind::B_NOT:
+				expr = mknode<UnaryExpr>(TokenKind::B_NOT, std::move(operand),
+				                         start, end);
+				break;
 			case TokenKind::INCREMENT:
-				return mknode<UnaryExpr>(TokenKind::POSTINC, std::move(expr),
+				expr = mknode<UnaryExpr>(TokenKind::PREINC, std::move(operand),
 				                         start, end);
+				break;
 			case TokenKind::DECREMENT:
-				return mknode<UnaryExpr>(TokenKind::POSTDEC, std::move(expr),
+				expr = mknode<UnaryExpr>(TokenKind::PREDEC, std::move(operand),
 				                         start, end);
-			case TokenKind::IF:
-			{
-				auto predicate = parse_expr();
-				expect(TokenKind::ELSE);
-				auto alternative = parse_expr();
-				end = alternative->range.end;
-				return mknode<IfExpr>(std::move(predicate), std::move(expr),
-				                      std::move(alternative), start, end);
-			}
+				break;
 			default:
-				return nullptr;
+				break;
+		}
+	}
+	else if (!is_unary_post_op(kind) || kind == TokenKind::LPAREN)
+	{
+		expr = parse_primary_expr();
+		kind = tok.kind;
+		while (is_unary_post_op(kind))
+		{
+			auto end = tok.range.end;
+			expect(kind);
+			switch (kind)
+			{
+				case TokenKind::INCREMENT:
+					expr = mknode<UnaryExpr>(TokenKind::POSTINC,
+					                         std::move(expr), start, end);
+					break;
+				case TokenKind::DECREMENT:
+					expr = mknode<UnaryExpr>(TokenKind::POSTDEC,
+					                         std::move(expr), start, end);
+					break;
+				case TokenKind::IF:
+				{
+					auto predicate = parse_expr();
+					expect(TokenKind::ELSE);
+					auto alternative = parse_expr();
+					end = alternative->range.end;
+					expr = mknode<IfExpr>(std::move(predicate), std::move(expr),
+					                      std::move(alternative), start, end);
+					break;
+				}
+				case TokenKind::LBRACKET:
+				{
+					auto index = parse_expr();
+					auto end = tok.range.end;
+					expect(']');
+					expr = mknode<IndexExpr>(std::move(expr), std::move(index),
+					                         start, end);
+					break;
+				}
+				case TokenKind::LPAREN:
+				{
+					ExprList arguments;
+					while (tok.kind != TokenKind::RPAREN)
+					{
+						arguments.emplace_back(parse_expr());
+						if (!accept(','))
+							break;
+					}
+					auto end = tok.range.end;
+					expect(')');
+					expr = mknode<CallExpr>(std::move(expr),
+					                        std::move(arguments), start, end);
+					break;
+				}
+				case TokenKind::MEMBER:
+				{
+					auto id_start = tok.range.start;
+					auto id_end = tok.range.end;
+					std::string id_name = tok.text;
+					expect(TokenKind::IDENTIFIER);
+					auto id_expr =
+					    mknode<Identifier>(id_name, id_start, id_end);
+					auto start = expr->range.start;
+					auto end = id_expr->range.end;
+					expr = mknode<MemberExpr>(std::move(expr),
+					                          std::move(id_expr), start, end);
+					break;
+				}
+				default:
+					break;
+			}
+			kind = tok.kind;
 		}
 	}
 	return expr;
@@ -611,6 +739,7 @@ ExprPtr Parser::parse_unary_expr()
 
 Ast::ExprPtr Parser::parse_func_expr()
 {
+	TRACE_FUNC();
 	auto start = tok.range.start;
 	expect(TokenKind::FUNCTION);
 	expect('(');
@@ -635,6 +764,30 @@ Ast::ExprPtr Parser::parse_func_expr()
 	expect('}');
 	return mknode<FunctionLiteral>(std::move(arguments), std::move(stmts),
 	                               start, end);
+}
+
+Ast::ExprPtr Parser::parse_object_expr()
+{
+	TRACE_FUNC();
+	auto start = tok.range.start;
+	expect('{');
+	StringList member_names;
+	ExprList member_values;
+	while (tok.kind == TokenKind::IDENTIFIER)
+	{
+		std::string key(tok.text);
+		expect(TokenKind::IDENTIFIER);
+		expect(':');
+		auto expr = parse_expr();
+		member_names.emplace_back(std::move(key));
+		member_values.emplace_back(std::move(expr));
+		if (!accept(','))
+			break;
+	}
+	auto end = tok.range.end;
+	expect('}');
+	return mknode<ObjectLiteral>(std::move(member_names),
+	                             std::move(member_values), start, end);
 }
 
 // namespace Pop

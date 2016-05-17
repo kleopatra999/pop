@@ -1,6 +1,8 @@
 #include <pop/lexer.hpp>
 #include <pop/error.hpp>
+#include <cassert>
 #include <cctype>
+#include <iostream>
 #include <unordered_map>
 
 namespace Pop
@@ -100,8 +102,8 @@ TokenKind Lexer::next_token(Token &tok)
 	TokenKind k = TokenKind::ERROR;
 
 	reset();
-	while (isspace(getch()))
-		;
+	while (isspace(chr))
+		getch();
 	start_token(tok);
 
 	if (isalpha(chr) || chr == '_') // identifiers or keywords
@@ -227,7 +229,7 @@ TokenKind Lexer::next_token(Token &tok)
 			}
 			else // 0-prefixed octal literal
 			{
-				do
+				while (is_octal(chr) || chr == '.')
 				{
 					text += chr;
 					if (chr == '.')
@@ -244,14 +246,15 @@ TokenKind Lexer::next_token(Token &tok)
 						}
 					}
 					getch();
-				} while (is_octal(chr) || chr == '.');
+				}
 				if (is_float)
 					k = end_token(TokenKind::FLOAT_LITERAL, tok);
 				else
 					k = end_token(TokenKind::INT_LITERAL, tok);
 			}
 		}
-		else // decimal literal
+		else if (is_decimal(chr) ||
+		         (chr == '.' && is_decimal(inp.peek()))) // decimal literal
 		{
 			do
 			{
@@ -275,6 +278,15 @@ TokenKind Lexer::next_token(Token &tok)
 				k = end_token(TokenKind::FLOAT_LITERAL, tok);
 			else
 				k = end_token(TokenKind::INT_LITERAL, tok);
+		}
+		else if (chr == '.')
+		{
+			k = end_token(TokenKind::MEMBER, tok);
+			getch();
+		}
+		else
+		{
+			assert(false);
 		}
 	}
 	else if (chr == '"' || chr == '\'')
@@ -337,7 +349,6 @@ TokenKind Lexer::next_token(Token &tok)
 		else // subtract
 		{
 			k = end_token(TokenKind::SUB, tok);
-			getch();
 		}
 	}
 	else if (chr == '*')
@@ -551,8 +562,8 @@ TokenKind Lexer::next_token(Token &tok)
 	else
 	{
 		int c = chr;
-		getch();
 		k = end_token(static_cast<TokenKind>(c), tok);
+		getch();
 	}
 
 	return k;

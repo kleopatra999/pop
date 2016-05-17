@@ -238,8 +238,11 @@ struct ObjectLiteral final : public Expr
 {
 	StringList member_names;
 	ExprList member_values;
-	ObjectLiteral(const SourcePosition &start, const SourcePosition &end)
-	    : Expr(NodeKind::OBJECT_LITERAL, start, end)
+	ObjectLiteral(StringList member_names, ExprList member_values,
+	              const SourcePosition &start, const SourcePosition &end)
+	    : Expr(NodeKind::OBJECT_LITERAL, start, end),
+	      member_names(std::move(member_names)),
+	      member_values(std::move(member_values))
 	{
 	}
 	POP_AST_NODE

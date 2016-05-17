@@ -7,7 +7,24 @@ using namespace Pop;
 int main()
 {
 	std::stringstream ss;
-	ss << "let foo = 1+2;\n";
+	ss << "function fib(n) {\n"
+	      "    if (n == 0)\n"
+	      "        return 0;\n"
+	      "    else if (n == 1)\n"
+	      "        return 1;\n"
+	      "    else\n"
+	      "        return (fib(n-1) + fib(n-2));\n"
+	      "}\n"
+	      "fib(1);\n";
+
+	/*
+	    Lexer lex(ss);
+	    Token tok;
+	    while (lex.next_token(tok) != TokenKind::END)
+	    {
+	        tok.debug(std::cout);
+	    }
+	*/
 
 	Ast::ModulePtr mod;
 	try

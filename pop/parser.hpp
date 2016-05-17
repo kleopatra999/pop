@@ -42,21 +42,23 @@ private:
 		return accept(int(tk));
 	}
 
-	void expect(int t)
+	void expect_(int t, int line)
 	{
 		if (!accept(t))
 		{
 			std::stringstream ss;
 			ss << "unexpected '" << token_kind_name(tok.kind) << "', expected '"
-			   << token_kind_name(TokenKind(t)) << "' (" << int(t) << ")";
+			   << token_kind_name(TokenKind(t)) << "' (ASCII " << int(t)
+			   << ")\n";
+			ss << "reported from line " << line;
 			throw SyntaxError(ss.str(), tok.range.start.line,
 			                  tok.range.start.column);
 		}
 	}
 
-	void expect(TokenKind tk)
+	void expect_(TokenKind tk, int line)
 	{
-		expect(int(tk));
+		expect_(int(tk), line);
 	}
 
 	std::uint64_t parse_int(const std::string &s);
@@ -84,6 +86,7 @@ private:
 	Ast::ExprPtr parse_binop_rhs(int expr_prec, Ast::ExprPtr lhs);
 	Ast::ExprPtr parse_unary_expr();
 	Ast::ExprPtr parse_func_expr();
+	Ast::ExprPtr parse_object_expr();
 };
 
 static inline Ast::ModulePtr parse(std::istream &inp,
