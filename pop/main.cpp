@@ -7,6 +7,7 @@ using namespace Pop;
 int main()
 {
 	std::stringstream ss;
+
 	ss << "function fib(n) {\n"
 	      "    if (n == 0)\n"
 	      "        return 0;\n"
@@ -17,7 +18,7 @@ int main()
 	      "}\n"
 	      "fib(1);\n";
 
-	/*
+	/*  // test lexer
 	    Lexer lex(ss);
 	    Token tok;
 	    while (lex.next_token(tok) != TokenKind::END)
@@ -30,8 +31,13 @@ int main()
 	try
 	{
 		mod = parse(ss);
-		Ast::DebugVisitor visitor(std::cout);
-		mod->accept(visitor);
+		// Ast::DebugVisitor dvisitor(std::cout);
+		// mod->accept(dvisitor);
+		CodeGenVisitor cvisitor;
+		mod->accept(cvisitor);
+		auto ops = cvisitor.finish();
+		for (auto &op : ops)
+			op->list(std::cout);
 	}
 	catch (SyntaxError &e)
 	{

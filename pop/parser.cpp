@@ -44,7 +44,14 @@ struct ScopedTracer
 	}
 };
 
+#if 0
 #define TRACE_FUNC() ScopedTracer __tracer_##__COUNTER__##__(__func__)
+#else
+#define TRACE_FUNC() \
+	do               \
+	{                \
+	} while (0)
+#endif
 
 using namespace Ast;
 

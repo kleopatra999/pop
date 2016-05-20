@@ -6,7 +6,7 @@ BIN_SOURCES = main.cpp
 BIN_OBJECTS = $(BIN_SOURCES:.cpp=.o)
 BIN_DEPENDS = $(BIN_SOURCES:.cpp=.d)
 
-LIB_SOURCES = ast.cpp lexer.cpp parser.cpp token.cpp
+LIB_SOURCES = ast.cpp lexer.cpp opcodes.cpp parser.cpp token.cpp
 LIB_OBJECTS = $(LIB_SOURCES:.cpp=.o)
 LIB_DEPENDS = $(LIB_SOURCES:.cpp=.d)
 

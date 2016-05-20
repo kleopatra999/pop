@@ -2,6 +2,7 @@
 #define POP_HPP
 
 #include <pop/ast.hpp>
+#include <pop/codegen.hpp>
 #include <pop/debugvisitor.hpp>
 #include <pop/error.hpp>
 #include <pop/lexer.hpp>
