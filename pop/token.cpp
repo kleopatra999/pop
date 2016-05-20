@@ -21,7 +21,7 @@ const char *token_kind_name(TokenKind kind)
 		case TokenKind::RBRACKET:                 return "]";
 		// comments
 		case TokenKind::SINGLE_LINE_COMMENT:      return "SINGLE_LINE_COMMENT";
-		case TokenKind::MULIT_LINE_COMMENT:       return "MULIT_LINE_COMMENT";
+		case TokenKind::MULTI_LINE_COMMENT:       return "MULTI_LINE_COMMENT";
 		// literals
 		case TokenKind::NULL_LITERAL:             return "NULL_LITERAL";
 		case TokenKind::TRUE_LITERAL:             return "TRUE_LITERAL";
@@ -78,6 +78,7 @@ const char *token_kind_name(TokenKind kind)
 		case TokenKind::MUL_ASSIGN:               return "MUL_ASSIGN";
 		case TokenKind::DIV_ASSIGN:               return "DIV_ASSIGN";
 		case TokenKind::MOD_ASSIGN:               return "MOD_ASSIGN";
+		case TokenKind::POW_ASSIGN:               return "POW_ASSIGN";
 		case TokenKind::AND_ASSIGN:               return "AND_ASSIGN";
 		case TokenKind::OR_ASSIGN:                return "OR_ASSIGN";
 		case TokenKind::XOR_ASSIGN:               return "XOR_ASSIGN";

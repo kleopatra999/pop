@@ -115,7 +115,10 @@ TokenKind Lexer::next_token(Token &tok)
 		} while (isalnum(chr) || chr == '_');
 		auto found = keyword_map.find(text);
 		if (found != keyword_map.end())
+		{
+			text.clear();
 			k = end_token(found->second, tok);
+		}
 		else
 			k = end_token(TokenKind::IDENTIFIER, tok);
 	}
@@ -292,21 +295,32 @@ TokenKind Lexer::next_token(Token &tok)
 	else if (chr == '"' || chr == '\'')
 	{
 		int quote = chr;
-		getch();
+		getch();          // skip starting quote
 		if (chr == quote) // empty string
+		{
 			k = end_token(TokenKind::STRING_LITERAL, tok);
+			getch(); // skip closing quote
+		}
 		else
 		{
 			do
 			{
-				text += chr;
 				if (chr == '\\' && inp.peek() == quote)
 				{
 					text += quote;
-					getch(); // skip escaped quote
+					getch();
+				}
+				else
+				{
+					text += chr;
 				}
 				getch();
-			} while (chr != quote && chr != EOF);
+				if (chr == quote)
+				{
+					getch();
+					break;
+				}
+			} while (chr != EOF);
 			if (chr == EOF)
 			{
 				throw SyntaxError("EOF encountered in string literal", line,
@@ -361,8 +375,16 @@ TokenKind Lexer::next_token(Token &tok)
 		}
 		else if (chr == '*') // power-of
 		{
-			k = end_token(TokenKind::POW, tok);
 			getch();
+			if (chr == '=')
+			{
+				k = end_token(TokenKind::POW_ASSIGN, tok);
+				getch();
+			}
+			else
+			{
+				k = end_token(TokenKind::POW, tok);
+			}
 		}
 		else // multiply
 		{
@@ -391,6 +413,7 @@ TokenKind Lexer::next_token(Token &tok)
 				if (chr == '*' && inp.peek() == '/')
 				{
 					text += "*/";
+					getch(); // skip asterisk
 					getch(); // skip peeked trailing slash
 					break;
 				}
@@ -400,7 +423,7 @@ TokenKind Lexer::next_token(Token &tok)
 				throw SyntaxError("EOF encountered in multi-line comment", line,
 				                  column);
 			}
-			k = end_token(TokenKind::MULIT_LINE_COMMENT, tok);
+			k = end_token(TokenKind::MULTI_LINE_COMMENT, tok);
 		}
 		else if (chr == '=') // divide-assign
 		{
@@ -529,6 +552,11 @@ TokenKind Lexer::next_token(Token &tok)
 				k = end_token(TokenKind::LSHIFT, tok);
 			}
 		}
+		else if (chr == '=') // <= comparison
+		{
+			k = end_token(TokenKind::LE, tok);
+			getch();
+		}
 		else // less-than comparison
 		{
 			k = end_token(TokenKind::LT, tok);
@@ -549,6 +577,11 @@ TokenKind Lexer::next_token(Token &tok)
 			{
 				k = end_token(TokenKind::RSHIFT, tok);
 			}
+		}
+		else if (chr == '=') // >= comparison
+		{
+			k = end_token(TokenKind::GE, tok);
+			getch();
 		}
 		else // greater-than comparison
 		{

@@ -1,5 +1,4 @@
 #include <pop/parser.hpp>
-#include <pop/parenter.hpp>
 #include <iostream>
 #include <sstream>
 #include <unordered_map>
@@ -181,8 +180,6 @@ ModulePtr Parser::parse()
 	lex.next_token(tok);
 	while (auto stmt = parse_stmt())
 		mod->stmts.push_back(std::move(stmt));
-	ParentSetVisitor visitor;
-	mod->accept(visitor);
 	return mod;
 }
 

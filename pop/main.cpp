@@ -8,6 +8,15 @@ int main()
 {
 	std::stringstream ss;
 
+	ss << "let x=1;\n"
+	      "let y=1.5;\n"
+	      "if (x > y) {\n"
+	      "  print(x);\n"
+	      "} else {\n"
+	      "  print(y);\n"
+	      "}\n";
+
+/*
 	ss << "function fib(n) {\n"
 	      "    if (n == 0)\n"
 	      "        return 0;\n"
@@ -16,7 +25,7 @@ int main()
 	      "    else\n"
 	      "        return (fib(n-1) + fib(n-2));\n"
 	      "}\n"
-	      "fib(1);\n";
+	      "fib(1);\n";*/
 
 	/*  // test lexer
 	    Lexer lex(ss);

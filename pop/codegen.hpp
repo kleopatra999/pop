@@ -263,10 +263,10 @@ struct CodeGenVisitor : public Visitor
 	virtual void visit(CompoundStmt &n)
 	{
 		enter();
-		add_op<OpenScope>();
+		//add_op<OpenScope>();
 		for (auto &stmt : n.stmts)
 			stmt->accept(*this);
-		add_op<CloseScope>();
+		//add_op<CloseScope>();
 		leave();
 	}
 
@@ -291,6 +291,7 @@ struct CodeGenVisitor : public Visitor
 			n.expr->accept(*this);
 		else
 			add_op<PushNull>();
+		add_op<CloseScope>();
 		add_op<Return>();
 	}
 

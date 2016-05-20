@@ -25,7 +25,7 @@ enum class TokenKind : std::uint8_t
 	RBRACKET = ']',
 
 	SINGLE_LINE_COMMENT = 128,
-	MULIT_LINE_COMMENT,
+	MULTI_LINE_COMMENT,
 
 	// literals
 	NULL_LITERAL,
@@ -88,6 +88,7 @@ enum class TokenKind : std::uint8_t
 	MUL_ASSIGN,
 	DIV_ASSIGN,
 	MOD_ASSIGN,
+	POW_ASSIGN,
 	AND_ASSIGN,
 	OR_ASSIGN,
 	XOR_ASSIGN,
