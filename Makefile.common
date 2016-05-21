@@ -6,13 +6,15 @@ POP_LDFLAGS = $(LDFLAGS)
 ifndef RELEASE
 	POP_CXXFLAGS += -g -UNDEBUG -DPOP_DEBUG=1
 else
-	POP_CXXFLAGS += -O3 -DNDEBUG=1 -UPOP_DEBUG
+	POP_CXXFLAGS += -s -O4 -DNDEBUG=1 -UPOP_DEBUG
 endif
 
 ifeq ($(V), 1)
-	POP_CXX = $(CXX) -c -MMD
+	POP_CXX   = $(CXX) -c -MMD
 	POP_CXXLD = $(CXXLD)
+	POP_AR    = $(AR) rcs
 else
-	POP_CXX = @echo "  COMPILE $@" && $(CXX) -c -MMD
+	POP_CXX   = @echo "  COMPILE $@" && $(CXX) -c -MMD
 	POP_CXXLD = @echo "  LINK $@" && $(CXX)
+	POP_AR    = @echo "  ARCHIVE $@" && $(AR) rcs
 endif

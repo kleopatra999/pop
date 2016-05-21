@@ -46,6 +46,11 @@ struct Instruction
 		buf.put_u8(static_cast<std::uint8_t>(code));
 	}
 
+	virtual void ccodegen(std::ostream &out) const
+	{
+		out << "\t" << name() << "();\n";
+	}
+
 	const char *name() const
 	{
 		return opcode_name(code);
@@ -81,6 +86,10 @@ struct Label final : public Instruction
 	virtual void codegen(CodeBuffer &, LabelMap &) const override final
 	{
 		throw RuntimeError("cannot generate code for labels");
+	}
+	virtual void ccodegen(std::ostream &out) const override final
+	{
+		out << name << ":\n";
 	}
 };
 
@@ -140,6 +149,10 @@ struct Bind final : public Instruction
 		for (auto ch : name)
 			buf.put_u8(ch);
 	}
+	virtual void ccodegen(std::ostream &out) const override final
+	{
+		out << "\tBIND(" << name << ");\n";
+	}
 };
 
 struct Call final : public Instruction
@@ -180,6 +193,10 @@ struct Jump final : public Instruction
 		Instruction::codegen(buf, labels);
 		buf.put_addr(labels[label]);
 	}
+	virtual void ccodegen(std::ostream &out) const override final
+	{
+		out << "\tJUMP(" << label << ");\n";
+	}
 };
 
 struct JumpTrue final : public Instruction
@@ -206,6 +223,10 @@ struct JumpTrue final : public Instruction
 		Instruction::codegen(buf, labels);
 		buf.put_addr(labels[label]);
 	}
+	virtual void ccodegen(std::ostream &out) const override final
+	{
+		out << "\tJUMP_TRUE(" << label << ");\n";
+	}
 };
 
 struct JumpFalse final : public Instruction
@@ -231,6 +252,10 @@ struct JumpFalse final : public Instruction
 	{
 		Instruction::codegen(buf, labels);
 		buf.put_addr(labels[label]);
+	}
+	virtual void ccodegen(std::ostream &out) const override final
+	{
+		out << "\tJUMP_FALSE(" << label << ");\n";
 	}
 };
 
@@ -289,6 +314,10 @@ struct PushInt final : public Instruction
 		Instruction::codegen(buf, labels);
 		buf.put_u64(value);
 	}
+	virtual void ccodegen(std::ostream &out) const override final
+	{
+		out << "\tPUSH_INT(" << value << "ULL);\n";
+	}
 };
 
 struct PushFloat final : public Instruction
@@ -314,6 +343,10 @@ struct PushFloat final : public Instruction
 	{
 		Instruction::codegen(buf, labels);
 		buf.put_f64(value);
+	}
+	virtual void ccodegen(std::ostream &out) const override final
+	{
+		out << "\tPUSH_FLOAT(" << value << "L);\n";
 	}
 };
 
@@ -341,6 +374,10 @@ struct PushString final : public Instruction
 		Instruction::codegen(buf, labels);
 		buf.put_string(value);
 	}
+	virtual void ccodegen(std::ostream &out) const override final
+	{
+		out << "\tPUSH_STRING(\"" << value << "\");\n";
+	}
 };
 
 struct PushSymbol final : public Instruction
@@ -366,6 +403,10 @@ struct PushSymbol final : public Instruction
 	{
 		Instruction::codegen(buf, labels);
 		buf.put_ident(name);
+	}
+	virtual void ccodegen(std::ostream &out) const override final
+	{
+		out << "\tPUSH_SYMBOL(" << name << ");\n";
 	}
 };
 
@@ -393,6 +434,10 @@ struct PushList final : public Instruction
 		Instruction::codegen(buf, labels);
 		buf.put_u32(len);
 	}
+	virtual void ccodegen(std::ostream &out) const override final
+	{
+		out << "\tPUSH_LIST(" << len << ");\n";
+	}
 };
 
 struct PushDict final : public Instruction
@@ -418,6 +463,10 @@ struct PushDict final : public Instruction
 	{
 		Instruction::codegen(buf, labels);
 		buf.put_u32(len);
+	}
+	virtual void ccodegen(std::ostream &out) const override final
+	{
+		out << "\tPUSH_DICT(" << len << ");\n";
 	}
 };
 
@@ -452,6 +501,10 @@ struct PushFunction final : public Instruction
 	{
 		Instruction::codegen(buf, labels);
 		buf.put_addr(labels[name]);
+	}
+	virtual void ccodegen(std::ostream &out) const override final
+	{
+		out << "\tPUSH_FUNCTION(" << name << ");\n";
 	}
 };
 
