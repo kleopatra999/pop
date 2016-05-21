@@ -1,7 +1,8 @@
-#ifndef POP_CODEGEN_HPP
-#define POP_CODEGEN_HPP
+#ifndef POP_TRANSFORMER_HPP
+#define POP_TRANSFORMER_HPP
 
 #include <pop/ast.hpp>
+#include <pop/instructions.hpp>
 #include <pop/opcodes.hpp>
 #include <cassert>
 #include <stack>
@@ -11,29 +12,23 @@ namespace Pop
 {
 using namespace Ast;
 
-template <class T, class... Args>
-static inline OpPtr mkop(Args &&... args)
+struct Transformer : public Visitor
 {
-	return std::make_unique<Operation>(std::forward<Args>(args)...);
-}
-
-struct CodeGenVisitor : public Visitor
-{
-	OpList decl_ops;
-	OpList code_ops;
+	InstructionList decl_ops;
+	InstructionList code_ops;
 	std::vector<unsigned int> depth_stack;
-	std::stack<OpList *> ops_stack;
+	std::stack<InstructionList *> ops_stack;
 	std::stack<std::string> control_stack;
 
-	CodeGenVisitor()
+	Transformer()
 	{
 		depth_stack.emplace_back(0);
 		begin_code();
 	}
 
-	OpList finish()
+	InstructionList finish()
 	{
-		OpList combined;
+		InstructionList combined;
 		combined.emplace_back(new Jump("_pop_start_"));
 		for (auto &op : decl_ops)
 			combined.emplace_back(op.release());
@@ -263,10 +258,10 @@ struct CodeGenVisitor : public Visitor
 	virtual void visit(CompoundStmt &n)
 	{
 		enter();
-		//add_op<OpenScope>();
+		// add_op<OpenScope>();
 		for (auto &stmt : n.stmts)
 			stmt->accept(*this);
-		//add_op<CloseScope>();
+		// add_op<CloseScope>();
 		leave();
 	}
 
@@ -376,7 +371,14 @@ struct CodeGenVisitor : public Visitor
 	}
 };
 
+inline InstructionList transform(ModulePtr &mod)
+{
+	Transformer xformer;
+	mod->accept(xformer);
+	return xformer.finish();
+}
+
 // namespace Pop
 }
 
-#endif // POP_CODEGEN_HPP
+#endif // POP_TRANSFORMER_HPP

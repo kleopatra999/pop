@@ -138,17 +138,20 @@ int main()
 
 	try
 	{
-		Lexer lex(ss);
-		Token tok;
+		auto tokens = tokenize(ss, "<test>");
+		size_t i = 0, index = 0;
 		const size_t n = sizeof(test_codes) / sizeof(TestCodes);
-		size_t i;
 		for (i = 0; i < n; i++)
 		{
 			auto &test = test_codes[i];
 			assert(test.kinds.size() == test.texts.size());
 			for (size_t j = 0; j < test.kinds.size(); j++)
 			{
-				if (lex.next_token(tok) == TK::END)
+				size_t new_index = index + 1;
+				assert(new_index < tokens.size());
+				index = new_index;
+				auto &tok = tokens[index];
+				if (tok.kind == TK::END)
 					break;
 				assert(tok.kind != TK::ERROR);
 				if (tok.kind != test.kinds[j])

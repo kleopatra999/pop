@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <ostream>
 #include <string>
+#include <vector>
 
 namespace Pop
 {
@@ -146,6 +147,8 @@ struct Token
 		    << "\" column=\"" << range.start.column << "\">\n";
 	}
 };
+
+typedef std::vector<Token> TokenList;
 
 // namespace Pop
 }

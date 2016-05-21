@@ -8,15 +8,6 @@ int main()
 {
 	std::stringstream ss;
 
-	ss << "let x=1;\n"
-	      "let y=1.5;\n"
-	      "if (x > y) {\n"
-	      "  print(x);\n"
-	      "} else {\n"
-	      "  print(y);\n"
-	      "}\n";
-
-/*
 	ss << "function fib(n) {\n"
 	      "    if (n == 0)\n"
 	      "        return 0;\n"
@@ -25,28 +16,22 @@ int main()
 	      "    else\n"
 	      "        return (fib(n-1) + fib(n-2));\n"
 	      "}\n"
-	      "fib(1);\n";*/
+	      "fib(1);\n";
 
-	/*  // test lexer
-	    Lexer lex(ss);
-	    Token tok;
-	    while (lex.next_token(tok) != TokenKind::END)
-	    {
-	        tok.debug(std::cout);
-	    }
+	/*
+	ss << "let a=1;\n"
+	      "a++;\n"
+	      "print(a);\n";
 	*/
 
-	Ast::ModulePtr mod;
 	try
 	{
-		mod = parse(ss);
-		// Ast::DebugVisitor dvisitor(std::cout);
-		// mod->accept(dvisitor);
-		CodeGenVisitor cvisitor;
-		mod->accept(cvisitor);
-		auto ops = cvisitor.finish();
+		std::stringstream sout;
+		compile(ss, "<string>", sout);
+		InstructionList ops;
+		disassemble(sout, ops);
 		for (auto &op : ops)
-			op->list(std::cout);
+			op->dis(std::cout);
 	}
 	catch (SyntaxError &e)
 	{

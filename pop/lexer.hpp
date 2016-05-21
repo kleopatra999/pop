@@ -4,6 +4,7 @@
 #include <pop/token.hpp>
 #include <cstdint>
 #include <istream>
+#include <vector>
 
 namespace Pop
 {
@@ -34,6 +35,20 @@ private:
 	void start_token(Token &out_token);
 	TokenKind end_token(TokenKind k, Token &out_token);
 };
+
+static inline TokenList tokenize(std::istream &in, const char *fn = "<stream>")
+{
+	Lexer lex(in, fn);
+	TokenList tokens;
+	TokenKind kind;
+	do
+	{
+		Token tok;
+		kind = lex.next_token(tok);
+		tokens.push_back(std::move(tok));
+	} while (kind != TokenKind::END && kind != TokenKind::ERROR);
+	return tokens;
+}
 
 // namespace Pop
 }
