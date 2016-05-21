@@ -1,6 +1,6 @@
 *.o
 *.d
 *.so
-/pop/popvm
+/pop/popc
 /pop/popnc
 /tests/test_lexer

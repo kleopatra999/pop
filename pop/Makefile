@@ -2,26 +2,28 @@
 
 POP_CXXFLAGS += -I..
 
-BIN_SOURCES = main.cpp
-BIN_OBJECTS = $(BIN_SOURCES:.cpp=.o)
-BIN_DEPENDS = $(BIN_SOURCES:.cpp=.d)
-
 LIB_SOURCES = assembler.cpp ast.cpp disassembler.cpp format.cpp \
               lexer.cpp opcodes.cpp parser.cpp token.cpp
 LIB_OBJECTS = $(LIB_SOURCES:.cpp=.o)
 LIB_DEPENDS = $(LIB_SOURCES:.cpp=.d)
 
+CC_SOURCES = main.cpp
+CC_OBJECTS = $(CC_SOURCES:.cpp=.o)
+CC_DEPENDS = $(CC_SOURCES:.cpp=.d)
+
 NC_SOURCES = nativec.cpp
 NC_OBJECTS = $(NC_SOURCES:.cpp=.o)
 NC_DEPENDS = $(NC_SOURCES:.cpp=.d)
 
-all: popvm popnc
+DEPENDS = $(LIB_DEPENDS) $(CC_DEPENDS) $(NC_DEPENDS)
+
+all: popc popnc
 
 clean:
-	$(RM) *.o *.d popvm popnc libpop.so
+	$(RM) *.o *.d popc popnc libpop.so
 
-popvm: $(BIN_OBJECTS) libpop.so
-	$(strip $(POP_CXXLD) $(POP_CXXFLAGS) -o $@ $(BIN_OBJECTS) $(POP_LDFLAGS) -L. -lpop)
+popc: $(CC_OBJECTS) libpop.so
+	$(strip $(POP_CXXLD) $(POP_CXXFLAGS) -o $@ $(CC_OBJECTS) $(POP_LDFLAGS) -L. -lpop)
 
 popnc: $(NC_OBJECTS) libpop.so
 	$(strip $(POP_CXXLD) $(POP_CXXFLAGS) -o $@ $(NC_OBJECTS) $(POP_LDFLAGS) -L. -lpop)
@@ -32,6 +34,6 @@ libpop.so: $(LIB_OBJECTS)
 .cpp.o:
 	$(strip $(POP_CXX) $(POP_CXXFLAGS) -o $@ $<)
 
--include $(BIN_DEPENDS) $(LIB_DEPENDS) $(NC_DEPENDS)
+-include $(DEPENDS)
 
 .PHONY: all clean
