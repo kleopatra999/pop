@@ -2,4 +2,5 @@
 *.d
 *.so
 /pop/popvm
+/pop/popnc
 /tests/test_lexer
