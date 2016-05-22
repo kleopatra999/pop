@@ -1,6 +1,7 @@
 *.[aod]
 *.so
 /tests/test_lexer
+/tools/poptok
 /tools/popast
 /tools/popc
 /tools/popcc

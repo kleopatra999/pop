@@ -11,7 +11,7 @@ endif
 
 ifeq ($(V), 1)
 	POP_CXX   = $(CXX) -c -MMD
-	POP_CXXLD = $(CXXLD)
+	POP_CXXLD = $(CXX)
 	POP_AR    = $(AR) rcs
 else
 	POP_CXX   = @echo "  COMPILE $@" && $(CXX) -c -MMD

@@ -3,6 +3,10 @@
 POP_CXXFLAGS += -I..
 POP_LDFLAGS += -L../pop -lpop
 
+TK_SOURCES = tokdump.cpp
+TK_OBJECTS = $(TK_SOURCES:.cpp=.o)
+TK_DEPENDS = $(TK_SOURCES:.cpp=.d)
+
 AD_SOURCES = astdump.cpp
 AD_OBJECTS = $(AD_SOURCES:.cpp=.o)
 AD_DEPENDS = $(AD_SOURCES:.cpp=.d)
@@ -19,12 +23,16 @@ DIS_SOURCES = dis.cpp
 DIS_OBJECTS = $(DIS_SOURCES:.cpp=.o)
 DIS_DEPENDS = $(DIS_SOURCES:.cpp=.d)
 
-DEPENDS = $(AD_DEPENDS) $(C_DEPENDS) $(CC_DEPENDS) $(DIS_DEPENDS)
+DEPENDS = $(TK_DEPENDS) $(AD_DEPENDS) \
+          $(C_DEPENDS) $(CC_DEPENDS) $(DIS_DEPENDS)
 
-all: popast popc popcc popdis
+all: poptok popast popc popcc popdis
 
 clean:
 	$(RM) *.[do] popast popc popcc popdis
+
+poptok: $(TK_OBJECTS) ../pop/libpop.so
+	$(strip $(POP_CXXLD) $(POP_CXXFLAGS) -o $@ $(TK_OBJECTS) $(POP_LDFLAGS))
 
 popast: $(AD_OBJECTS) ../pop/libpop.so
 	$(strip $(POP_CXXLD) $(POP_CXXFLAGS) -o $@ $(AD_OBJECTS) $(POP_LDFLAGS))
