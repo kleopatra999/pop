@@ -10,7 +10,8 @@ libpop_la_SOURCES = \
 	lexer.cpp \
 	opcodes.cpp \
 	parser.cpp \
-	token.cpp
+	token.cpp \
+	vm.cpp
 
 popincludedir = $(includedir)/pop
 popinclude_HEADERS = \
@@ -30,4 +31,5 @@ popinclude_HEADERS = \
 	pop.hpp \
 	token.hpp \
 	transformer.hpp \
-	visitor.hpp
+	visitor.hpp \
+	vm.hpp

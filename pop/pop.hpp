@@ -22,5 +22,6 @@
 #include <pop/token.hpp>
 #include <pop/transformer.hpp>
 #include <pop/visitor.hpp>
+#include <pop/vm.hpp>
 
 #endif // POP_HPP
