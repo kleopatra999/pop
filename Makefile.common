@@ -1,4 +1,11 @@
-POP_CXXFLAGS = $(CPPFLAGS) $(CXXFLAGS) -std=c++14 -pedantic -fPIC \
+CXX   ?= cc
+AR    ?= ar
+MKDIR ?= mkdir -p
+CP    ?= cp
+
+POP_CXXFLAGS = \
+	$(CPPFLAGS) -I$(top_srcdir) \
+	$(CXXFLAGS) -std=c++14 -pedantic -fPIC \
 	-Wall -Wextra -Werror
 
 POP_LDFLAGS = $(LDFLAGS)
@@ -14,7 +21,7 @@ ifeq ($(V), 1)
 	POP_CXXLD = $(CXX)
 	POP_AR    = $(AR) rcs
 else
-	POP_CXX   = @echo "  COMPILE $@" && $(CXX) -c -MMD
-	POP_CXXLD = @echo "  LINK $@" && $(CXX)
-	POP_AR    = @echo "  ARCHIVE $@" && $(AR) rcs
+	POP_CXX   = @echo "  COMPILE " $(notdir $@) && $(CXX) -c -MMD
+	POP_CXXLD = @echo "  LINK    " $(notdir $@) && $(CXX)
+	POP_AR    = @echo "  ARCHIVE " $(notdir $@) && $(AR) rcs
 endif

@@ -1,0 +1,9 @@
+all:
+	$(MAKE) -C "$(top_builddir)/pop" $@
+	$(MAKE) -C "$(top_builddir)/tools" $@
+	$(MAKE) -C "$(top_builddir)/tests" $@
+
+clean:
+	$(MAKE) -C "$(top_builddir)/pop" $@
+	$(MAKE) -C "$(top_builddir)/tools" $@
+	$(MAKE) -C "$(top_builddir)/tests" $@

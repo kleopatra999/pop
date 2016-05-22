@@ -1,0 +1,18 @@
+SOURCES = assembler.cpp ast.cpp disassembler.cpp format.cpp \
+              lexer.cpp opcodes.cpp parser.cpp token.cpp
+OBJECTS = $(addprefix $(builddir)/,$(SOURCES:.cpp=.o))
+DEPENDS = $(addprefix $(builddir)/,$(SOURCES:.cpp=.d))
+
+all: libpop.so libpop.a
+
+clean:
+	$(RM) *.[ado] *.so
+
+libpop.so: $(OBJECTS)
+	$(strip $(POP_CXXLD) -shared $(POP_CXXFLAGS) -o $@ $^ $(POP_LDFLAGS))
+
+libpop.a: $(OBJECTS)
+	$(strip $(POP_AR) $@ $^)
+
+$(builddir)/%.o: $(srcdir)/%.cpp
+	$(strip $(POP_CXX) $(POP_CXXFLAGS) -o $@ $<)
