@@ -1,3 +1,5 @@
+ACLOCAL_AMFLAGS = -I m4
 SUBDIRS = pop tools tests
 
-ACLOCAL_AMFLAGS = -I m4
+pkgconfigdir = $(libdir)/pkgconfig
+pkgconfig_DATA = pop.pc

@@ -9,6 +9,7 @@ AX_PROG_CXX14
 LT_INIT
 AC_CONFIG_FILES([
 	Makefile
+	pop.pc
 	pop/Makefile
 	tools/Makefile
 	tests/Makefile

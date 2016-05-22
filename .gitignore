@@ -10,6 +10,7 @@ Makefile
 Makefile.in
 .deps/
 .libs/
+pop.pc
 /configure
 /aclocal.m4
 /autom4te.cache/
