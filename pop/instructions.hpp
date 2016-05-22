@@ -11,7 +11,7 @@
 #include <pop/format.hpp>
 #include <pop/opcodes.hpp>
 #include <pop/token.hpp>
-#include <cstdint>
+#include <pop/types.hpp>
 #include <cstdio>
 #include <iomanip>
 #include <iostream>
@@ -48,7 +48,7 @@ struct Instruction
 
 	virtual void codegen(CodeBuffer &buf, LabelMap &) const
 	{
-		buf.put_u8(static_cast<std::uint8_t>(code));
+		buf.put_u8(static_cast<Uint8>(code));
 	}
 
 	virtual void ccodegen(std::ostream &out) const
@@ -297,8 +297,8 @@ struct PushFalse final : public Instruction
 
 struct PushInt final : public Instruction
 {
-	std::uint64_t value;
-	PushInt(std::uint64_t value, CodeAddr addr = CodeAddr(-1))
+	Uint64 value;
+	PushInt(Uint64 value, CodeAddr addr = CodeAddr(-1))
 	    : Instruction(OpCode::OP_PUSH_INT, addr), value(value)
 	{
 	}
@@ -312,7 +312,7 @@ struct PushInt final : public Instruction
 	}
 	virtual size_t size() const override final
 	{
-		return 1 + sizeof(std::uint64_t);
+		return 1 + sizeof(Uint64);
 	}
 	virtual void codegen(CodeBuffer &buf, LabelMap &labels) const override final
 	{
@@ -417,8 +417,8 @@ struct PushSymbol final : public Instruction
 
 struct PushList final : public Instruction
 {
-	std::uint32_t len;
-	PushList(std::uint32_t len, CodeAddr addr = CodeAddr(-1))
+	Uint32 len;
+	PushList(Uint32 len, CodeAddr addr = CodeAddr(-1))
 	    : Instruction(OpCode::OP_PUSH_LIST, addr), len(len)
 	{
 	}

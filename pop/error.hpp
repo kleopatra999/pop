@@ -6,7 +6,7 @@
 #ifndef POP_ERROR_HPP
 #define POP_ERROR_HPP
 
-#include <cstdint>
+#include <pop/types.hpp>
 #include <stdexcept>
 #include <string>
 
@@ -32,24 +32,24 @@ public:
 class SyntaxError : public Error
 {
 public:
-	SyntaxError(const std::string &what, std::uint32_t line = std::uint32_t(-1),
-	            std::uint32_t column = std::uint32_t(-1))
+	SyntaxError(const std::string &what, Uint32 line = Uint32(-1),
+	            Uint32 column = Uint32(-1))
 	    : Error(what), line_(line), column_(column)
 	{
 	}
 
-	std::uint32_t line() const
+	Uint32 line() const
 	{
 		return line_;
 	}
-	std::uint32_t column() const
+	Uint32 column() const
 	{
 		return column_;
 	}
 
 private:
-	std::uint32_t line_;
-	std::uint32_t column_;
+	Uint32 line_;
+	Uint32 column_;
 };
 
 // namespace Pop

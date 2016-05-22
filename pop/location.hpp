@@ -6,18 +6,17 @@
 #ifndef POP_LOCATION_HPP
 #define POP_LOCATION_HPP
 
-#include <cstdint>
+#include <pop/types.hpp>
 
 namespace Pop
 {
 
 struct SourcePosition
 {
-	std::uint32_t offset;
-	std::uint32_t line;
-	std::uint32_t column;
-	SourcePosition(std::uint32_t offset = 0, std::uint32_t line = 0,
-	               std::uint32_t column = 0)
+	Uint32 offset;
+	Uint32 line;
+	Uint32 column;
+	SourcePosition(Uint32 offset = 0, Uint32 line = 0, Uint32 column = 0)
 	    : offset(offset), line(line), column(column)
 	{
 	}

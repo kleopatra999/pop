@@ -9,6 +9,7 @@
 
 #include <pop/lexer.hpp>
 #include <pop/error.hpp>
+#include <pop/types.hpp>
 #include <cassert>
 #include <cctype>
 #include <iostream>
@@ -69,7 +70,7 @@ int Lexer::getch()
 	if (chr == '\n')
 	{
 		line++;
-		column = std::uint32_t(-1);
+		column = Uint32(-1);
 	}
 	else
 	{

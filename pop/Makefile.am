@@ -11,6 +11,7 @@ libpop_la_SOURCES = \
 	opcodes.cpp \
 	parser.cpp \
 	token.cpp \
+	value.cpp \
 	vm.cpp
 
 popincludedir = $(includedir)/pop
@@ -20,6 +21,7 @@ popinclude_HEADERS = \
 	codebuffer.hpp \
 	compiler.hpp \
 	debugvisitor.hpp \
+	decoder.hpp \
 	disassembler.hpp \
 	error.hpp \
 	format.hpp \
@@ -31,5 +33,7 @@ popinclude_HEADERS = \
 	pop.hpp \
 	token.hpp \
 	transformer.hpp \
+	types.hpp \
+	value.hpp \
 	visitor.hpp \
 	vm.hpp

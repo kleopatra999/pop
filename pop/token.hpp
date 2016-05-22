@@ -7,7 +7,7 @@
 #define POP_TOKEN_HPP
 
 #include <pop/location.hpp>
-#include <cstdint>
+#include <pop/types.hpp>
 #include <ostream>
 #include <string>
 #include <vector>
@@ -15,7 +15,7 @@
 namespace Pop
 {
 
-enum class TokenKind : std::uint8_t
+enum class TokenKind : Uint8
 {
 	END = 0,
 

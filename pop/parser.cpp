@@ -8,6 +8,7 @@
 #endif
 
 #include <pop/parser.hpp>
+#include <pop/types.hpp>
 #include <iostream>
 #include <sstream>
 #include <unordered_map>
@@ -143,7 +144,7 @@ static inline bool is_left_associative(TokenKind kind)
 	return false;
 }
 
-std::uint64_t Parser::parse_int(const std::string &s)
+Uint64 Parser::parse_int(const std::string &s)
 {
 	if (s.size() > 2 && s[0] == '0')
 	{

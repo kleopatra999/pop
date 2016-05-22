@@ -8,8 +8,8 @@
 
 #include <pop/location.hpp>
 #include <pop/token.hpp>
+#include <pop/types.hpp>
 #include <pop/visitor.hpp>
-#include <cstdint>
 #include <memory>
 #include <string>
 #include <vector>
@@ -169,8 +169,8 @@ struct BoolLiteral final : public Expr
 
 struct IntLiteral final : public Expr
 {
-	std::uint64_t value;
-	IntLiteral(std::uint64_t value, const SourcePosition &start,
+	Uint64 value;
+	IntLiteral(Uint64 value, const SourcePosition &start,
 	           const SourcePosition &end)
 	    : Expr(NodeKind::INT_LITERAL, start, end), value(value)
 	{

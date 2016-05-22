@@ -11,6 +11,7 @@
 #include <pop/codebuffer.hpp>
 #include <pop/compiler.hpp>
 #include <pop/debugvisitor.hpp>
+#include <pop/decoder.hpp>
 #include <pop/disassembler.hpp>
 #include <pop/error.hpp>
 #include <pop/format.hpp>
@@ -21,6 +22,7 @@
 #include <pop/parser.hpp>
 #include <pop/token.hpp>
 #include <pop/transformer.hpp>
+#include <pop/types.hpp>
 #include <pop/visitor.hpp>
 #include <pop/vm.hpp>
 

@@ -7,12 +7,12 @@
 #define POP_OPCODES_HPP
 
 #include <pop/token.hpp>
-#include <cstdint>
+#include <pop/types.hpp>
 
 namespace Pop
 {
 
-enum class OpCode : std::uint8_t
+enum class OpCode : Uint8
 {
 	OP_HALT,
 	OP_NOP,
