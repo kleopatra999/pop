@@ -1,3 +1,7 @@
+#ifdef HAVE_CONFIG_H
+#include <pop/config.h>
+#endif
+
 #include <pop/format.hpp>
 #include <cassert>
 #include <cerrno>

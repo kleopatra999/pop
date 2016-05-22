@@ -1,3 +1,7 @@
+#ifdef HAVE_CONFIG_H
+#include <pop/config.h>
+#endif
+
 #include <pop/disassembler.hpp>
 #include <pop/format.hpp>
 #include <pop/opcodes.hpp>
