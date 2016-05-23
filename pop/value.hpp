@@ -273,8 +273,12 @@ struct List final : public Value
 	{
 		std::stringstream ss;
 		ss << "[";
-		for (auto elem : elements)
-			ss << elem->_repr_();
+		for (size_t i = 0; i < elements.size(); i++)
+		{
+			ss << elements[i]->_repr_();
+			if (i < (elements.size() - 1))
+				ss << ", ";
+		}
 		ss << "]";
 		return ss.str();
 	}

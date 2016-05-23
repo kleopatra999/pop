@@ -13,6 +13,10 @@
 namespace Pop
 {
 
+//#define VM_TRACE 1
+
+#ifdef VM_TRACE
+
 struct VMTrace
 {
 	static size_t ind_level;
@@ -38,9 +42,6 @@ struct VMTrace
 
 size_t VMTrace::ind_level = 0;
 
-//#define VM_TRACE 1
-
-#ifdef VM_TRACE
 #define VM_TRACE_ENTER(op)                        \
 	{                                             \
 		VMTrace _trace_##__COUNTER__##_(#op, ip); \
@@ -49,6 +50,7 @@ size_t VMTrace::ind_level = 0;
 #define VM_TRACE_LEAVE() \
 	}                    \
 	}
+
 #else
 #define VM_TRACE_ENTER(op) {
 #define VM_TRACE_LEAVE() }

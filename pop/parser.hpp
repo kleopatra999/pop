@@ -96,6 +96,7 @@ private:
 	Ast::ExprPtr parse_unary_expr();
 	Ast::ExprPtr parse_func_expr();
 	Ast::ExprPtr parse_object_expr();
+	Ast::ExprPtr parse_list_expr();
 };
 
 static inline Ast::ModulePtr parse(std::istream &inp,

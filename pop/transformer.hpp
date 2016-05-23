@@ -139,6 +139,11 @@ struct Transformer : public Visitor
 
 	virtual void visit(ListLiteral &n)
 	{
+		for (auto it = n.elements.rbegin(); it != n.elements.rend(); ++it)
+		{
+			auto &elem = *it;
+			elem->accept(*this);
+		}
 		add_op<PushList>(n.elements.size());
 	}
 

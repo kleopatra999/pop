@@ -556,6 +556,8 @@ ExprPtr Parser::parse_primary_expr()
 			return parse_paren_expr();
 		case TokenKind::LBRACE:
 			return parse_object_expr();
+		// case TokenKind::LBRACKET:
+		//	return parse_list_expr();
 		case TokenKind::END:
 			return nullptr;
 		default:
@@ -748,6 +750,10 @@ ExprPtr Parser::parse_unary_expr()
 			kind = tok.kind;
 		}
 	}
+	else if (kind == TokenKind::LBRACKET)
+	{
+		expr = parse_list_expr();
+	}
 	return expr;
 }
 
@@ -802,6 +808,31 @@ Ast::ExprPtr Parser::parse_object_expr()
 	expect('}');
 	return mknode<ObjectLiteral>(std::move(member_names),
 	                             std::move(member_values), start, end);
+}
+
+Ast::ExprPtr Parser::parse_list_expr()
+{
+	TRACE_FUNC();
+	auto start = tok.range.start;
+	expect('[');
+	ExprList elements;
+	auto end = tok.range.end;
+	if (!accept(']')) // not empty
+	{
+		while (true)
+		{
+			auto expr = parse_expr();
+			elements.emplace_back(std::move(expr));
+			if (!accept(','))
+				break;
+			// allow trailing comma
+			if (tok.kind == TokenKind::RBRACKET)
+				break;
+		}
+		end = tok.range.end;
+		expect(']');
+	}
+	return mknode<ListLiteral>(std::move(elements), start, end);
 }
 
 // namespace Pop

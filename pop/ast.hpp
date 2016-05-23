@@ -222,8 +222,10 @@ struct Identifier final : public Expr
 struct ListLiteral final : public Expr
 {
 	ExprList elements;
-	ListLiteral(const SourcePosition &start, const SourcePosition &end)
-	    : Expr(NodeKind::LIST_LITERAL, start, end)
+	ListLiteral(ExprList elements, const SourcePosition &start,
+	            const SourcePosition &end)
+	    : Expr(NodeKind::LIST_LITERAL, start, end),
+	      elements(std::move(elements))
 	{
 	}
 	POP_AST_NODE
