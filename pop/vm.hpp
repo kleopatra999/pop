@@ -107,7 +107,7 @@ struct VM
 		static_assert(std::is_base_of<Value, T>::value,
 		              "can only push Pop::Value subclasses to stack");
 		auto x = new T(std::forward<Args>(args)...);
-		stack.push(x);
+		push(x);
 		return x;
 	}
 };

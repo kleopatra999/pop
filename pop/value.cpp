@@ -48,6 +48,61 @@ const char *value_type_name(ValueType type)
 	return "Unknown";
 }
 
+bool Value::_equal_(const Value *right) const
+{
+	if (type == ValueType::NUL && right->type == ValueType::NUL)
+	{
+		return true;
+	}
+	else if (type == ValueType::BOOL && right->type == ValueType::BOOL)
+	{
+		return (static_cast<const Bool*>(this)->value ==
+				static_cast<const Bool*>(right)->value);
+	}
+	else if (type == ValueType::INT && right->type == ValueType::INT)
+	{
+		return (static_cast<const Int*>(this)->value ==
+				static_cast<const Int*>(right)->value);
+	}
+	else if (type == ValueType::INT && right->type == ValueType::FLOAT)
+	{
+		return (static_cast<const Int*>(this)->value ==
+				static_cast<const Float*>(right)->value);
+	}
+	else if (type == ValueType::FLOAT && right->type == ValueType::INT)
+	{
+		return (static_cast<const Float*>(this)->value ==
+				static_cast<const Int*>(right)->value);
+	}
+	else if (type == ValueType::FLOAT && right->type == ValueType::FLOAT)
+	{
+		return (static_cast<const Float*>(this)->value ==
+				static_cast<const Float*>(right)->value);
+	}
+	else if (type == ValueType::STRING && right->type == ValueType::STRING)
+	{
+		return (static_cast<const String*>(this)->value ==
+				static_cast<const String*>(right)->value);
+	}
+	else if (type == ValueType::FUNC && right->type == ValueType::FUNC)
+	{
+		return (static_cast<const Function*>(this)->addr ==
+				static_cast<const Function*>(right)->addr);
+	}
+	else if (type == ValueType::OBJECT && right->type == ValueType::OBJECT)
+	{
+		return (static_cast<const void*>(this) == static_cast<const void*>(right));
+	}
+	else
+	{
+		std::stringstream ss;
+		ss << "cannot test equality of types '" << type_name() << "' and '"
+		   << right->type_name() << "'";
+		throw RuntimeError(ss.str());
+	}
+	return false;
+}
+
 Value *Value::_add_(Value *right) const
 {
 	if (type == ValueType::INT && right->type == ValueType::INT)
@@ -771,32 +826,32 @@ Value *Value::_postdec_()
 	return nullptr;
 }
 
-Value *Value::_eq_(Value *right) const
+Value *Value::_eq_(const Value *right) const
+{
+	return new Bool(_equal_(right));
+}
+
+Value *Value::_ne_(const Value *right) const
 {
 	return nullptr;
 }
 
-Value *Value::_ne_(Value *right) const
+Value *Value::_gt_(const Value *right) const
 {
 	return nullptr;
 }
 
-Value *Value::_gt_(Value *right) const
+Value *Value::_ge_(const Value *right) const
 {
 	return nullptr;
 }
 
-Value *Value::_ge_(Value *right) const
+Value *Value::_lt_(const Value *right) const
 {
 	return nullptr;
 }
 
-Value *Value::_lt_(Value *right) const
-{
-	return nullptr;
-}
-
-Value *Value::_le_(Value *right) const
+Value *Value::_le_(const Value *right) const
 {
 	return nullptr;
 }

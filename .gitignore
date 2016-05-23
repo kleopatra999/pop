@@ -17,3 +17,4 @@ pop.pc
 /m4/libtool.m4
 /m4/lt*.m4
 /pop/config.h*
+*.pro.user

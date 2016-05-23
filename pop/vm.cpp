@@ -38,6 +38,9 @@ struct VMTrace
 
 size_t VMTrace::ind_level = 0;
 
+//#define VM_TRACE 1
+
+#ifdef VM_TRACE
 #define VM_TRACE_ENTER(op)                        \
 	{                                             \
 		VMTrace _trace_##__COUNTER__##_(#op, ip); \
@@ -46,6 +49,10 @@ size_t VMTrace::ind_level = 0;
 #define VM_TRACE_LEAVE() \
 	}                    \
 	}
+#else
+#define VM_TRACE_ENTER(op) {
+#define VM_TRACE_LEAVE() }
+#endif
 
 VM::VM() : VM(0, nullptr)
 {
@@ -71,6 +78,7 @@ int VM::execute(const Uint8 *code, CodeAddr len)
 	while (running && !paused)
 	{
 		auto op = dec.read_op();
+		// std::cerr << ".";
 		switch (op)
 		{
 			case OpCode::OP_HALT:
@@ -100,7 +108,9 @@ int VM::execute(const Uint8 *code, CodeAddr len)
 				VM_TRACE_LEAVE()
 			case OpCode::OP_BIND:
 				VM_TRACE_ENTER(BIND)
-				env->define(dec.read_name(), pop());
+				auto name = dec.read_name();
+				auto value = pop();
+				env->define(name, value);
 				break;
 				VM_TRACE_LEAVE()
 			case OpCode::OP_CALL:
@@ -177,11 +187,14 @@ int VM::execute(const Uint8 *code, CodeAddr len)
 				VM_TRACE_LEAVE()
 			case OpCode::OP_PUSH_SYMBOL:
 				VM_TRACE_ENTER(PUSH_SYMBOL)
-				if (auto value = env->lookup(dec.read_name(), true))
+				auto name = dec.read_name();
+				if (auto value = env->lookup(name, true))
 					push(value);
 				else
 				{
-					// todo: error, undefined symbol
+					std::stringstream ss;
+					ss << "undefined symbol '" << name << "'";
+					throw RuntimeError(ss.str());
 				}
 				break;
 				VM_TRACE_LEAVE()
@@ -341,10 +354,10 @@ void VM::dump_stack()
 	}
 	else
 	{
-		for (size_t i = (stack.values.size() - 1), n = 0; i >= 0; i--)
+		for (size_t i = 0; i < stack.values.size(); i++)
 		{
-			auto value = stack.values[i];
-			std::cerr << "Stack[" << i << "]=" << value->_repr_() << ";\n";
+			std::cerr << "stack[" << i << "]=" << stack.values[i]->_repr_()
+			          << std::endl;
 		}
 	}
 }

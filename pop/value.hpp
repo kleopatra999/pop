@@ -12,6 +12,7 @@
 
 #include <pop/error.hpp>
 #include <pop/types.hpp>
+#include <iostream>
 #include <sstream>
 #include <string>
 #include <unordered_map>
@@ -78,6 +79,7 @@ struct Value
 		return std::hash<std::uintptr_t>()(
 		    reinterpret_cast<std::uintptr_t>(this));
 	}
+	virtual bool _equal_(const Value *right) const;
 	virtual bool _not_() const = 0;
 	Value *_add_(Value *right) const;
 	Value *_sub_(Value *right) const;
@@ -111,12 +113,12 @@ struct Value
 	Value *_predec_();
 	Value *_postinc_();
 	Value *_postdec_();
-	Value *_eq_(Value *right) const;
-	Value *_ne_(Value *right) const;
-	Value *_gt_(Value *right) const;
-	Value *_ge_(Value *right) const;
-	Value *_lt_(Value *right) const;
-	Value *_le_(Value *right) const;
+	Value *_eq_(const Value *right) const;
+	Value *_ne_(const Value *right) const;
+	Value *_gt_(const Value *right) const;
+	Value *_ge_(const Value *right) const;
+	Value *_lt_(const Value *right) const;
+	Value *_le_(const Value *right) const;
 };
 
 struct ValueHasher
@@ -127,7 +129,19 @@ struct ValueHasher
 	}
 };
 
-typedef std::unordered_map<Value *, Value *, ValueHasher> ValueMap;
+struct ValueEqualer
+{
+	size_t operator()(const Value *left, const Value *right) const
+	{
+		auto result = left->_eq_(right);
+		if (result && !result->_not_())
+			return true;
+		return false;
+	}
+};
+
+typedef std::unordered_map<Value *, Value *, ValueHasher, ValueEqualer>
+    ValueMap;
 typedef std::vector<Value *> ValueList;
 
 struct Null final : public Value
@@ -376,7 +390,7 @@ struct Env final : public Value
 	}
 	void define(const std::string &name, Value *value)
 	{
-		table.emplace(new Pop::String(name), value);
+		define(new Pop::String(name), value);
 	}
 	Value *lookup(Value *key, bool search_parent = true)
 	{
