@@ -116,6 +116,13 @@ struct Nop final : public Instruction
 	}
 };
 
+struct Print final : public Instruction
+{
+	Print(CodeAddr addr = CodeAddr(-1)) : Instruction(OpCode::OP_PRINT, addr)
+	{
+	}
+};
+
 struct OpenScope final : public Instruction
 {
 	OpenScope(CodeAddr addr = CodeAddr(-1))
@@ -166,8 +173,31 @@ struct Bind final : public Instruction
 
 struct Call final : public Instruction
 {
-	Call(CodeAddr addr = CodeAddr(-1)) : Instruction(OpCode::OP_CALL, addr)
+	unsigned int nargs;
+	Call(unsigned int nargs, CodeAddr addr = CodeAddr(-1))
+	    : Instruction(OpCode::OP_CALL, addr), nargs(nargs)
 	{
+	}
+	virtual void list(std::ostream &out) override final
+	{
+		out << "\tCALL " << nargs << "\n";
+	}
+	virtual void dis(std::ostream &out) const override final
+	{
+		out << format("0x%08X:\tCALL %u\n", addr, nargs);
+	}
+	virtual size_t size() const override final
+	{
+		return 2; // opcode + 1-byte length
+	}
+	virtual void codegen(CodeBuffer &buf, LabelMap &labels) const override final
+	{
+		Instruction::codegen(buf, labels);
+		buf.put_u8(nargs);
+	}
+	virtual void ccodegen(std::ostream &out) const override final
+	{
+		out << "\tCALL(" << nargs << ");\n";
 	}
 };
 

@@ -7,6 +7,7 @@ AM_SILENT_RULES([yes])
 AM_PROG_AR
 AX_PROG_CXX14
 LT_INIT
+AC_DEFINE([POP_COMPILING], [1], [Defined when compiling Pop])
 AC_CONFIG_FILES([
 	Makefile
 	pop.pc

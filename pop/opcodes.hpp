@@ -20,6 +20,7 @@ enum class OpCode : Uint8
 {
 	OP_HALT,
 	OP_NOP,
+	OP_PRINT,
 
 	OP_OPEN_SCOPE,
 	OP_CLOSE_SCOPE,
@@ -72,10 +73,10 @@ enum class OpCode : Uint8
 	OP_IP_MUL,
 	OP_IP_DIV,
 	OP_IP_MOD,
+	OP_IP_POW,
 	OP_IP_AND,
 	OP_IP_OR,
 	OP_IP_XOR,
-	OP_IP_NOT,
 	OP_IP_LEFT,
 	OP_IP_RIGHT,
 	OP_IP_ASSIGN,

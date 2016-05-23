@@ -141,6 +141,9 @@ void disassemble(std::istream &inp, InstructionList &out)
 			case OpCode::OP_NOP:
 				out.push_back(mkop<Nop>(op_addr));
 				break;
+			case OpCode::OP_PRINT:
+				out.push_back(mkop<Print>(op_addr));
+				break;
 			case OpCode::OP_OPEN_SCOPE:
 				out.push_back(mkop<OpenScope>(op_addr));
 				break;
@@ -151,7 +154,7 @@ void disassemble(std::istream &inp, InstructionList &out)
 				out.push_back(mkop<Bind>(reader.read_name(addr), op_addr));
 				break;
 			case OpCode::OP_CALL:
-				out.push_back(mkop<Call>(op_addr));
+				out.push_back(mkop<Call>(reader.read_u8(addr), op_addr));
 				break;
 			case OpCode::OP_RETURN:
 				out.push_back(mkop<Return>(op_addr));
@@ -234,7 +237,6 @@ void disassemble(std::istream &inp, InstructionList &out)
 			case OpCode::OP_IP_AND:
 			case OpCode::OP_IP_OR:
 			case OpCode::OP_IP_XOR:
-			case OpCode::OP_IP_NOT:
 			case OpCode::OP_IP_LEFT:
 			case OpCode::OP_IP_RIGHT:
 			case OpCode::OP_IP_ASSIGN:

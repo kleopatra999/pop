@@ -218,10 +218,18 @@ struct Transformer : public Visitor
 			auto &arg = *it;
 			arg->accept(*this);
 		}
-		// push arg count
-		add_op<PushInt>(n.arguments.size());
-		n.callee->accept(*this);
-		add_op<Call>();
+		// special case for the builtin print function
+		if (n.callee->kind == NodeKind::IDENTIFIER &&
+		    static_cast<Identifier *>(n.callee.get())->name == "print")
+		{
+			add_op<Print>();
+			return;
+		}
+		else
+		{
+			n.callee->accept(*this);
+			add_op<Call>(n.arguments.size());
+		}
 	}
 
 	virtual void visit(IfExpr &n)

@@ -14,9 +14,32 @@
 #include <pop/opcodes.hpp>
 #include <pop/types.hpp>
 #include <pop/value.hpp>
+#include <cassert>
+#include <memory>
+#include <stack>
+#include <type_traits>
 
 namespace Pop
 {
+
+struct ValueStack
+{
+	ValueList values;
+	Value *pop()
+	{
+		auto val = values.back();
+		values.pop_back();
+		return val;
+	}
+	void push(Value *val)
+	{
+		values.emplace_back(val);
+	}
+	Value *top() const
+	{
+		return values.back();
+	}
+};
 
 struct VM
 {
@@ -24,6 +47,9 @@ struct VM
 
 	CodeAddr ip;
 	Decoder dec;
+	ValueStack stack;
+	std::stack<CodeAddr> return_stack;
+	Env *env;
 	bool running;
 	bool paused;
 	int exit_code;
@@ -40,6 +66,46 @@ struct VM
 	void pause();
 	void resume();
 	void exit(int exit_code = 0);
+
+	void call(unsigned int)
+	{
+		auto callee = pop();
+		if (callee->type == ValueType::FUNC)
+		{
+			auto addr = static_cast<Function *>(callee)->addr;
+			return_stack.push(ip);
+			ip = addr;
+		}
+		else
+		{
+			std::stringstream ss;
+			ss << "value type '" << callee->type_name() << "' is not callable";
+			throw RuntimeError(ss.str());
+		}
+	}
+
+	Value *pop()
+	{
+		assert(!stack.values.empty());
+		auto top = stack.top();
+		stack.pop();
+		return top;
+	}
+
+	void push(Value *value)
+	{
+		stack.push(value);
+	}
+
+	template <class T, class... Args>
+	T *push_new(Args &&... args)
+	{
+		static_assert(std::is_base_of<Value, T>::value,
+		              "can only push Pop::Value subclasses to stack");
+		auto x = new T(std::forward<Args>(args)...);
+		stack.push(x);
+		return x;
+	}
 };
 
 // namespace Pop

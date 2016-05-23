@@ -21,6 +21,8 @@ const char *opcode_name(OpCode code)
 			return "HALT";
 		case OpCode::OP_NOP:
 			return "NOP";
+		case OpCode::OP_PRINT:
+			return "PRINT";
 
 		case OpCode::OP_OPEN_SCOPE:
 			return "OPEN_SCOPE";
@@ -116,18 +118,18 @@ const char *opcode_name(OpCode code)
 			return "IP_DIV";
 		case OpCode::OP_IP_MOD:
 			return "IP_MOD";
+		case OpCode::OP_IP_POW:
+			return "IP_POW";
 		case OpCode::OP_IP_AND:
-			return "AND";
+			return "IP_AND";
 		case OpCode::OP_IP_OR:
-			return "OR";
+			return "IP_OR";
 		case OpCode::OP_IP_XOR:
-			return "XOR";
-		case OpCode::OP_IP_NOT:
-			return "NOT";
+			return "IP_XOR";
 		case OpCode::OP_IP_LEFT:
-			return "LEFT";
+			return "IP_LEFT";
 		case OpCode::OP_IP_RIGHT:
-			return "RIGHT";
+			return "IP_RIGHT";
 		case OpCode::OP_IP_ASSIGN:
 			return "ASSIGN";
 		case OpCode::OP_IP_PREINC:
@@ -213,8 +215,6 @@ OpCode opcode_from_token(TokenKind kind)
 			return OpCode::OP_IP_OR;
 		case TokenKind::XOR_ASSIGN:
 			return OpCode::OP_IP_XOR;
-		case TokenKind::NOT_ASSIGN:
-			return OpCode::OP_IP_NOT;
 		case TokenKind::LEFT_ASSIGN:
 			return OpCode::OP_IP_LEFT;
 		case TokenKind::RIGHT_ASSIGN:
