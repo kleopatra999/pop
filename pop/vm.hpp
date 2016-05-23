@@ -67,6 +67,8 @@ struct VM
 	void resume();
 	void exit(int exit_code = 0);
 
+	void dump_stack();
+
 	void call(unsigned int)
 	{
 		auto callee = pop();
@@ -78,8 +80,10 @@ struct VM
 		}
 		else
 		{
+			dump_stack();
 			std::stringstream ss;
-			ss << "value type '" << callee->type_name() << "' is not callable";
+			ss << "value type '" << callee->type_name()
+			   << "' is not callable at '" << std::hex << ip << "'";
 			throw RuntimeError(ss.str());
 		}
 	}

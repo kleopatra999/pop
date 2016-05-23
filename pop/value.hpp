@@ -163,8 +163,8 @@ struct Bool final : public Value
 
 struct Int final : public Value
 {
-	Uint64 value;
-	Int(Uint64 value = 0) : Value(ValueType::INT), value(value)
+	long long int value;
+	Int(long long int value = 0) : Value(ValueType::INT), value(value)
 	{
 	}
 	virtual std::string _repr_() const override final
@@ -173,7 +173,7 @@ struct Int final : public Value
 	}
 	virtual size_t _hash_() const override final
 	{
-		return std::hash<Uint64>()(value);
+		return std::hash<long long int>()(value);
 	}
 	virtual bool _not_() const override final
 	{

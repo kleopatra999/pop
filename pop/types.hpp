@@ -19,6 +19,7 @@ typedef std::uint8_t Uint8;
 typedef std::uint16_t Uint16;
 typedef std::uint32_t Uint32;
 typedef std::uint64_t Uint64;
+typedef std::int64_t Int64;
 typedef float Float32;
 typedef double Float64;
 typedef std::uint32_t CodeAddr;

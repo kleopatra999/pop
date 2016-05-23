@@ -150,7 +150,6 @@ struct Transformer : public Visitor
 		begin_decls();
 		add_op<Label>(name);
 		add_op<OpenScope>();
-		add_op<PopTop>(); // argument count, not used yet
 		for (auto &argument : n.arguments)
 			add_op<Bind>(argument);
 		for (auto &stmt : n.stmts)
@@ -159,7 +158,6 @@ struct Transformer : public Visitor
 		end_decls();
 		leave();
 		// the function expression code
-		// add_op<Jump>(name);
 		add_op<PushFunction>(name);
 	}
 
@@ -175,23 +173,25 @@ struct Transformer : public Visitor
 
 	virtual void visit(BinaryExpr &n)
 	{
-		n.left->accept(*this);
+		// reverse order
 		n.right->accept(*this);
+		n.left->accept(*this);
 		add_op<BinOp>(opcode_from_token(n.op));
 	}
 
 	virtual void visit(SliceExpr &n)
 	{
-		if (n.start)
-			n.start->accept(*this);
+		// reverse order
+		if (n.step)
+			n.step->accept(*this);
 		else
 			add_op<PushNull>();
 		if (n.stop)
 			n.stop->accept(*this);
 		else
 			add_op<PushNull>();
-		if (n.step)
-			n.step->accept(*this);
+		if (n.start)
+			n.start->accept(*this);
 		else
 			add_op<PushNull>();
 		add_op<PushSlice>();
@@ -223,7 +223,6 @@ struct Transformer : public Visitor
 		    static_cast<Identifier *>(n.callee.get())->name == "print")
 		{
 			add_op<Print>();
-			return;
 		}
 		else
 		{
@@ -270,6 +269,7 @@ struct Transformer : public Visitor
 	virtual void visit(ExprStmt &n)
 	{
 		n.expr->accept(*this);
+		add_op<PopTop>();
 	}
 
 	virtual void visit(CompoundStmt &n)

@@ -79,6 +79,11 @@ struct Decoder
 		       (read_byte_as<Uint64>() << 8ULL) | read_byte_as<Uint64>();
 	}
 
+	Int64 read_s64()
+	{
+		return static_cast<Int64>(read_u64());
+	}
+
 	Float32 read_f32()
 	{
 		union

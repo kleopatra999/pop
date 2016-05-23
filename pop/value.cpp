@@ -8,7 +8,9 @@
 #endif
 
 #include <pop/value.hpp>
+#include <cassert>
 #include <cmath>
+#include <iostream>
 #include <sstream>
 
 namespace Pop

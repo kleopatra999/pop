@@ -60,6 +60,11 @@ public:
 		return *this;
 	}
 
+	CodeBuffer &put_s64(Int64 v)
+	{
+		return put_u64(static_cast<Uint64>(v));
+	}
+
 	CodeBuffer &put_f32(Float32 v)
 	{
 		union

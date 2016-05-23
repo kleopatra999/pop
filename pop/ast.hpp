@@ -173,8 +173,8 @@ struct BoolLiteral final : public Expr
 
 struct IntLiteral final : public Expr
 {
-	Uint64 value;
-	IntLiteral(Uint64 value, const SourcePosition &start,
+	long long int value;
+	IntLiteral(long long int value, const SourcePosition &start,
 	           const SourcePosition &end)
 	    : Expr(NodeKind::INT_LITERAL, start, end), value(value)
 	{

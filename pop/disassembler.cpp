@@ -62,6 +62,11 @@ struct ByteCodeReader
 		return v;
 	}
 
+	Int64 read_s64(CodeAddr &addr)
+	{
+		return static_cast<Int64>(read_u64(addr));
+	}
+
 	Float32 read_f32(CodeAddr &addr)
 	{
 		union
@@ -184,7 +189,7 @@ void disassemble(std::istream &inp, InstructionList &out)
 				out.push_back(mkop<PushFalse>(op_addr));
 				break;
 			case OpCode::OP_PUSH_INT:
-				out.push_back(mkop<PushInt>(reader.read_u64(addr), op_addr));
+				out.push_back(mkop<PushInt>(reader.read_s64(addr), op_addr));
 				break;
 			case OpCode::OP_PUSH_FLOAT:
 				out.push_back(mkop<PushFloat>(reader.read_f64(addr), op_addr));

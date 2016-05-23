@@ -331,8 +331,8 @@ struct PushFalse final : public Instruction
 
 struct PushInt final : public Instruction
 {
-	Uint64 value;
-	PushInt(Uint64 value, CodeAddr addr = CodeAddr(-1))
+	long long int value;
+	PushInt(long long int value, CodeAddr addr = CodeAddr(-1))
 	    : Instruction(OpCode::OP_PUSH_INT, addr), value(value)
 	{
 	}
@@ -342,16 +342,16 @@ struct PushInt final : public Instruction
 	}
 	virtual void dis(std::ostream &out) const override final
 	{
-		out << format("0x%08X:\tPUSH_INT %llu\n", addr, value);
+		out << format("0x%08X:\tPUSH_INT %lld\n", addr, value);
 	}
 	virtual size_t size() const override final
 	{
-		return 1 + sizeof(Uint64);
+		return 1 + sizeof(Int64);
 	}
 	virtual void codegen(CodeBuffer &buf, LabelMap &labels) const override final
 	{
 		Instruction::codegen(buf, labels);
-		buf.put_u64(value);
+		buf.put_s64(value);
 	}
 	virtual void ccodegen(std::ostream &out) const override final
 	{
