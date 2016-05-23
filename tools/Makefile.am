@@ -1,6 +1,6 @@
 bin_PROGRAMS = popast popc popcc popdis poptok popvm
 
-AM_CXXFLAGS = -I$(top_srcdir) -I$(top_builddir)
+AM_CPPFLAGS = -I$(top_srcdir) -I$(top_builddir) -UPOP_COMPILING
 LDADD = $(top_builddir)/pop/libpop.la
 
 popast_SOURCES = astdump.cpp

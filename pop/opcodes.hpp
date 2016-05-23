@@ -6,6 +6,10 @@
 #ifndef POP_OPCODES_HPP
 #define POP_OPCODES_HPP
 
+#if !defined(POP_COMPILING) && !defined(POP_HPP_INCLUDED)
+#error "Invalid individual include, include only the <pop/pop.hpp> header"
+#endif
+
 #include <pop/token.hpp>
 #include <pop/types.hpp>
 

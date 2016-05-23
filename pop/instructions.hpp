@@ -6,6 +6,10 @@
 #ifndef POP_INSTRUCTIONS_HPP
 #define POP_INSTRUCTIONS_HPP
 
+#if !defined(POP_COMPILING) && !defined(POP_HPP_INCLUDED)
+#error "Invalid individual include, include only the <pop/pop.hpp> header"
+#endif
+
 #include <pop/codebuffer.hpp>
 #include <pop/error.hpp>
 #include <pop/format.hpp>

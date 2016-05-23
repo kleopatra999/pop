@@ -6,6 +6,10 @@
 #ifndef POP_LOCATION_HPP
 #define POP_LOCATION_HPP
 
+#if !defined(POP_COMPILING) && !defined(POP_HPP_INCLUDED)
+#error "Invalid individual include, include only the <pop/pop.hpp> header"
+#endif
+
 #include <pop/types.hpp>
 
 namespace Pop

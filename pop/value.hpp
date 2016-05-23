@@ -6,6 +6,10 @@
 #ifndef POP_VALUE_HPP
 #define POP_VALUE_HPP
 
+#if !defined(POP_COMPILING) && !defined(POP_HPP_INCLUDED)
+#error "Invalid individual include, include only the <pop/pop.hpp> header"
+#endif
+
 #include <pop/types.hpp>
 #include <string>
 #include <unordered_map>

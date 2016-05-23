@@ -1,6 +1,6 @@
 lib_LTLIBRARIES = libpop.la
 
-AM_CXXFLAGS = -I$(top_srcdir) -I$(top_builddir)
+AM_CPPFLAGS = -I$(top_srcdir) -I$(top_builddir) -DPOP_COMPILING=1
 
 libpop_la_SOURCES = \
 	assembler.cpp \

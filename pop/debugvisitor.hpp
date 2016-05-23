@@ -6,6 +6,10 @@
 #ifndef POP_PARENTER_HPP
 #define POP_PARENTER_HPP
 
+#if !defined(POP_COMPILING) && !defined(POP_HPP_INCLUDED)
+#error "Invalid individual include, include only the <pop/pop.hpp> header"
+#endif
+
 #include <pop/ast.hpp>
 #include <cassert>
 #include <ostream>

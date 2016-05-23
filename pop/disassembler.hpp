@@ -6,6 +6,10 @@
 #ifndef POP_DISASSEMBLER_HPP
 #define POP_DISASSEMBLER_HPP
 
+#if !defined(POP_COMPILING) && !defined(POP_HPP_INCLUDED)
+#error "Invalid individual include, include only the <pop/pop.hpp> header"
+#endif
+
 #include <pop/instructions.hpp>
 #include <istream>
 

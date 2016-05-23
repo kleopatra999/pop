@@ -3,6 +3,13 @@
 // All rights reserved.
 // Licensed under the 2-clause BSD license, see LICENSE file.
 
+#ifndef POP_TYPES_HPP
+#define POP_TYPES_HPP
+
+#if !defined(POP_COMPILING) && !defined(POP_HPP_INCLUDED)
+#error "Invalid individual include, include only the <pop/pop.hpp> header"
+#endif
+
 #include <cstdint>
 
 namespace Pop
@@ -18,3 +25,5 @@ typedef std::uint32_t CodeAddr;
 
 // namespace Pop
 }
+
+#endif // POP_TYPES_HPP

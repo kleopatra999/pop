@@ -6,6 +6,7 @@
 #ifndef POP_HPP
 #define POP_HPP
 
+#define POP_HPP_INCLUDED 1
 #include <pop/assembler.hpp>
 #include <pop/ast.hpp>
 #include <pop/codebuffer.hpp>
@@ -25,5 +26,6 @@
 #include <pop/types.hpp>
 #include <pop/visitor.hpp>
 #include <pop/vm.hpp>
+#undef POP_HPP_INCLUDED
 
 #endif // POP_HPP

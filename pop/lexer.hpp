@@ -6,6 +6,10 @@
 #ifndef POP_LEXER_HPP
 #define POP_LEXER_HPP
 
+#if !defined(POP_COMPILING) && !defined(POP_HPP_INCLUDED)
+#error "Invalid individual include, include only the <pop/pop.hpp> header"
+#endif
+
 #include <pop/token.hpp>
 #include <cstdint>
 #include <istream>
