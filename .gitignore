@@ -10,6 +10,10 @@ Makefile
 Makefile.in
 .deps/
 .libs/
+/pop/pop
+/pop/stamp-h1
+/config.*
+/libtool
 pop.pc
 /configure
 /aclocal.m4

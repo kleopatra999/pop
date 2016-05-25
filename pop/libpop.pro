@@ -1,8 +1,11 @@
-AM_CPPFLAGS = -I$(top_srcdir) -I$(top_builddir)
+TEMPLATE = lib
+TARGET = pop
+CONFIG -= qt app_bundle
+QMAKE_CXXFLAGS = -std=c++14 -Wno-unused-parameter
+INCLUDEPATH += $$PWD/..
+DEFINES += POP_COMPILING=1
 
-lib_LTLIBRARIES = libpop.la
-
-libpop_la_SOURCES = \
+SOURCES = \
 	assembler.cpp \
 	ast.cpp \
 	disassembler.cpp \
@@ -14,8 +17,7 @@ libpop_la_SOURCES = \
 	value.cpp \
 	vm.cpp
 
-popincludedir = $(includedir)/pop
-popinclude_HEADERS = \
+HEADERS = \
 	assembler.hpp \
 	ast.hpp \
 	codebuffer.hpp \
@@ -37,7 +39,3 @@ popinclude_HEADERS = \
 	value.hpp \
 	visitor.hpp \
 	vm.hpp
-
-bin_PROGRAMS = pop
-pop_SOURCES = main.cpp
-pop_LDADD = libpop.la

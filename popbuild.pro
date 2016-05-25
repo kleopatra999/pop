@@ -1,13 +1,8 @@
 TEMPLATE = subdirs
 SUBDIRS = \
-	pop \
-	tests \
-	tools/popast.pro \
-	tools/popc.pro \
-	tools/popcc.pro \
-	tools/popdis.pro \
-	tools/poptok.pro \
-	tools/popvm.pro
+	pop/libpop.pro \
+	pop/pop.pro \
+	tests
 
-tools.depends = pop
-tests.depends = pop
+pop/pop.pro.depends = pop/libpop.pro
+tests.depends = pop/libpop.pro

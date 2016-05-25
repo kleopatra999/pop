@@ -1,4 +1,4 @@
-// vm.cpp - This file is part of Pop
+// main.cpp - This file is part of Pop
 // Copyright (c) 2016, Matthew Brush <mbrush@codebrainz.ca>
 // All rights reserved.
 // Licensed under the 2-clause BSD license, see LICENSE file.
@@ -554,21 +554,19 @@ static void run_vm(CmdOptions &opts)
 		{
 			std::string bc_file(notext(in_file) + ".pbc");
 			auto ex = ext(in_file);
-			if (ex != ".pbc") // need to pre-compile into a .pbc file
-			{
+			if (ex != ".pbc")
+			{ // need to pre-compile into a .pbc file
 				compile_file(opts, in_file, bc_file, bytecode);
 			}
 			else if (file_exist(bc_file)) // bytecode is already compiled
 			{
-				if (is_file_newer(
-				        in_file,
-				        bc_file)) // source has changed, need re-compile
-				{
+				if (is_file_newer(in_file, bc_file))
+				{ // source has changed, need re-compile
 					compile_file(opts, in_file, bc_file, bytecode);
 				}
 			}
-			else // just read the .pbc file directly
-			{
+			else
+			{ // just read the .pbc file directly
 				std::ifstream ifile(in_file);
 				if (!ifile)
 				{
