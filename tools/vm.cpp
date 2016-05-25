@@ -8,16 +8,16 @@
 #endif
 
 #include <pop/pop.hpp>
+#include <cassert>
 #include <cerrno>
 #include <cstdarg>
 #include <cstdio>
 #include <cstring>
 #include <fstream>
 #include <iostream>
-#include <string>
 #include <sstream>
-
-#include <cassert>
+#include <string>
+#include <sys/stat.h>
 
 #define str_eq(s1, s2) (std::strcmp(s1, s2) == 0)
 #define str_eqor(s1, s2, s3) (str_eq(s1, s2) || str_eq(s1, s3))
@@ -25,7 +25,7 @@
 struct CmdOptions
 {
 	std::string program;
-	std::vector<std::string> rest_args;
+	std::vector<char *> rest_args;
 	std::vector<std::string> input_files;
 	std::string output_file;
 	bool do_astdump;
@@ -94,26 +94,6 @@ struct CmdOptions
 			    "the -a, -c, -d, -l, and -t options are mutually exclusive");
 		}
 	}
-
-#ifndef NDEBUG
-	void debug(std::ostream &out) const
-	{
-		out << "Options:\n"
-		    << "  Program: " << program << "\n"
-		    << "  Output File: " << output_file << "\n"
-		    << "  Do AST Dump: " << (do_astdump ? "true" : "false") << "\n"
-		    << "  Do Compile: " << (do_compile ? "true" : "false") << "\n"
-		    << "  Do Disasm: " << (do_disasm ? "true" : "false") << "\n"
-		    << "  Do Listing: " << (do_listing ? "true" : "false") << "\n"
-		    << "  Do Tokens: " << (do_tokens ? "true" : "false") << "\n"
-		    << "  Input Files:\n";
-		for (auto &f : input_files)
-			out << "    " << f << "\n";
-		out << "  Rest Arguments:\n";
-		for (auto &a : rest_args)
-			out << "    " << a << "\n";
-	}
-#endif
 
 	void print_error(const char *fmt, ...)
 	{
@@ -492,13 +472,137 @@ static void print_tokens(CmdOptions &opts)
 	std::exit(EXIT_SUCCESS);
 }
 
+static inline std::string ext(const std::string &fn)
+{
+	auto dot = fn.rfind('.');
+	if (dot != fn.npos)
+		return fn.substr(dot + 1);
+	return "";
+}
+
+static inline std::string notext(const std::string &fn)
+{
+	auto dot = fn.rfind('.');
+	if (dot != fn.npos)
+		return fn.substr(0, dot);
+	return "";
+}
+
+static inline bool file_exist(const std::string &filename)
+{
+	struct stat buffer;
+	return (::stat(filename.c_str(), &buffer) == 0);
+}
+
+static inline bool is_file_newer(const std::string &file,
+                                 const std::string &than)
+{
+	struct stat st1, st2;
+	if (::stat(file.c_str(), &st1) == 0 && ::stat(than.c_str(), &st2) == 0)
+		return (st1.st_mtime > st2.st_mtime);
+	return false;
+}
+
+static void compile_file(CmdOptions &opts, const std::string &src,
+                         const std::string &dst, std::string &bytecode)
+{
+	std::ifstream ifile(src);
+	std::ofstream ofile(dst);
+	std::stringstream oss;
+
+	if (!ifile)
+	{
+		opts.print_error("failed to open input source file '%s': %s (%d)",
+		                 src.c_str(), std::strerror(errno), errno);
+	}
+	else if (!ofile)
+	{
+		opts.print_error("failed to open output bytecode file '%s': %s (%d)",
+		                 dst.c_str(), std::strerror(errno), errno);
+	}
+
+	Pop::compile(ifile, src, oss);
+	std::string bc(oss.str());
+	bytecode += bc;
+	ofile << bc;
+
+	if (ifile.fail() && !ifile.eof())
+	{
+		opts.print_error("error reading input source file '%s': %s (%d)",
+		                 src.c_str(), std::strerror(errno), errno);
+	}
+	else if (ofile.fail())
+	{
+		opts.print_error("error writing output source file '%s': %s (%d)",
+		                 dst.c_str(), std::strerror(errno), errno);
+	}
+
+	ifile.close();
+	ofile.close();
+}
+
+static void run_vm(CmdOptions &opts)
+{
+	if (opts.input_files.empty()) // run REPL
+	{
+		// todo
+	}
+	else // ensure compiled then execute bytecode
+	{
+		std::string bytecode;
+		for (auto &in_file : opts.input_files)
+		{
+			std::string bc_file(notext(in_file) + ".pbc");
+			auto ex = ext(in_file);
+			if (ex != ".pbc") // need to pre-compile into a .pbc file
+			{
+				compile_file(opts, in_file, bc_file, bytecode);
+			}
+			else if (file_exist(bc_file)) // bytecode is already compiled
+			{
+				if (is_file_newer(
+				        in_file,
+				        bc_file)) // source has changed, need re-compile
+				{
+					compile_file(opts, in_file, bc_file, bytecode);
+				}
+			}
+			else // just read the .pbc file directly
+			{
+				std::ifstream ifile(in_file);
+				if (!ifile)
+				{
+					opts.print_error("failed to read input file '%s': %s (%d)",
+					                 in_file.c_str(), std::strerror(errno),
+					                 errno);
+				}
+				ifile.seekg(ifile.end);
+				auto len = ifile.tellg();
+				ifile.seekg(ifile.beg);
+				auto bc = std::string(size_t(len) + 1, '\0');
+				ifile.read(&bc[0], len);
+				if (!ifile)
+				{
+					opts.print_error(
+					    "failed to read bytecode file '%s': %s (%d)",
+					    in_file.c_str(), std::strerror(errno), errno);
+				}
+				ifile.close();
+				bytecode += bc;
+			}
+		}
+		int argc = opts.rest_args.size();
+		auto argv = (char **)opts.rest_args.data();
+		auto code = (const unsigned char *)bytecode.data();
+		unsigned int len = bytecode.size();
+		Pop::VM vm(code, len, argc, argv);
+		std::exit(vm.execute());
+	}
+}
+
 int main(int argc, char **argv)
 {
 	CmdOptions opts(argc, argv);
-
-#ifndef NDEBUG
-// opts.debug(std::cout);
-#endif
 
 	if (opts.do_astdump)
 		print_ast(opts);
@@ -511,9 +615,7 @@ int main(int argc, char **argv)
 	else if (opts.do_tokens)
 		print_tokens(opts);
 	else
-	{
-		// run VM
-	}
+		run_vm(opts);
 
 	return 0;
 }

@@ -18,3 +18,4 @@ pop.pc
 /m4/lt*.m4
 /pop/config.h*
 *.pro.user
+*.pbc
